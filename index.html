@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>กาแฟแมวส้ม — จัดซื้อ & สูตรชง</title>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#1A1008; --card:#231508; --orange:#E8621A; --ol:#F5916A;
+    --cream:#F7EDE0; --border:rgba(255,255,255,0.08); --green:#8FBC8F; --red:#E88080;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);font-family:'Mitr',sans-serif;color:var(--cream);padding-bottom:60px;}
+
+  .header{padding:32px 20px 20px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+  .header::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:400px;height:200px;background:radial-gradient(ellipse,rgba(232,98,26,0.18) 0%,transparent 70%);pointer-events:none;}
+  .htag{display:inline-block;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--ol);border:1px solid rgba(232,98,26,0.4);padding:4px 14px;border-radius:999px;margin-bottom:10px;}
+  .header h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);}
+
+  .tabs{display:flex;gap:0;padding:16px 16px 0;position:sticky;top:0;background:var(--bg);z-index:10;}
+  .tab{flex:1;text-align:center;padding:12px 8px;font-size:13px;font-weight:500;color:rgba(247,237,224,0.45);border-bottom:2px solid var(--border);cursor:pointer;transition:.2s;}
+  .tab.active{color:var(--ol);border-bottom-color:var(--orange);}
+
+  .view{display:none;padding:20px 16px;max-width:640px;margin:0 auto;}
+  .view.active{display:block;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px;}
+  .card-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(247,237,224,0.4);margin-bottom:14px;font-weight:500;}
+
+  label{display:block;font-size:11px;color:rgba(247,237,224,0.55);margin-bottom:5px;margin-top:12px;font-weight:300;}
+  label:first-of-type{margin-top:0;}
+  .field-hint{font-size:10.5px;color:var(--ol);margin:-6px 0 10px;}
+  input, select, textarea{
+    width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;
+    padding:10px 12px;color:var(--cream);font-family:'Mitr',sans-serif;font-size:13px;outline:none;
+  }
+  input:focus, select:focus, textarea:focus{border-color:rgba(232,98,26,0.5);}
+  select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%23F5916A'/></svg>");background-repeat:no-repeat;background-position:right 12px center;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .checkrow{display:flex;align-items:center;gap:8px;margin-top:14px;}
+  .checkrow input{width:auto;}
+  .checkrow span{font-size:11px;color:rgba(247,237,224,0.55);font-weight:300;}
+
+  .btn{width:100%;margin-top:16px;background:linear-gradient(90deg,var(--orange),#F5916A);border:none;border-radius:10px;padding:12px;color:#1A1008;font-weight:600;font-size:13px;cursor:pointer;letter-spacing:.5px;}
+  .btn:active{opacity:.85;}
+  .btn:disabled{opacity:.5;}
+  .btn-ghost{background:transparent;border:1px solid rgba(232,98,26,0.4);color:var(--ol);}
+
+  .status{font-size:11px;padding:8px 12px;border-radius:8px;margin-top:10px;display:none;}
+  .status.ok{display:block;background:rgba(58,107,74,0.15);color:var(--green);border:1px solid rgba(143,188,143,0.25);}
+  .status.err{display:block;background:rgba(220,60,60,0.1);color:var(--red);border:1px solid rgba(220,100,100,0.25);}
+
+  .log-item{padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;}
+  .log-item:last-child{border-bottom:none;}
+  .log-left{color:var(--cream);}
+  .log-sub{font-size:10px;color:rgba(247,237,224,0.4);margin-top:2px;}
+  .log-right{text-align:right;color:var(--ol);font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:10px;}
+  .cat-pill{display:inline-block;font-size:9px;padding:2px 8px;border-radius:999px;background:rgba(232,98,26,0.15);color:var(--ol);margin-right:6px;}
+  .log-del{background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:2px 4px;opacity:.7;}
+  .log-del:active{opacity:1;}
+
+  .hist-toggle{font-size:11px;color:var(--ol);margin-top:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;user-select:none;}
+  .hist-panel{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;max-height:160px;overflow-y:auto;padding:2px;}
+  .hist-chip{font-size:11px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:rgba(247,237,224,0.8);cursor:pointer;line-height:1.4;}
+  .hist-chip:active{background:rgba(232,98,26,0.15);border-color:rgba(232,98,26,0.35);}
+  .hist-chip b{color:var(--cream);font-weight:500;}
+  .hist-chip span{display:block;font-size:9px;color:rgba(247,237,224,0.4);}
+  .hist-empty{font-size:11px;color:rgba(247,237,224,0.3);}
+
+  .recipe-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .recipe-row:last-child{border-bottom:none;}
+  .recipe-del{background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 6px;}
+
+  .cogs-box{background:rgba(232,98,26,0.1);border:1px solid rgba(232,98,26,0.3);border-radius:12px;padding:14px 16px;margin-top:14px;}
+  .cogs-line{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:rgba(247,237,224,0.7);}
+  .cogs-line.total{font-size:14px;color:var(--cream);font-weight:600;border-top:1px solid rgba(232,98,26,0.25);margin-top:6px;padding-top:8px;}
+  .gp-good{color:var(--green);} .gp-bad{color:var(--red);}
+
+  .empty{text-align:center;padding:24px 12px;color:rgba(247,237,224,0.3);font-size:12px;}
+  .loading{text-align:center;padding:20px;color:rgba(247,237,224,0.4);font-size:12px;}
+
+  .stock-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
+  .stock-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .stock-name{font-size:14px;font-weight:500;color:var(--cream);}
+  .stock-qty{font-size:13px;color:var(--ol);font-weight:600;white-space:nowrap;}
+  .stock-sub{font-size:10px;color:rgba(247,237,224,0.35);margin-top:2px;}
+  .stock-uses{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+  .stock-use{display:flex;justify-content:space-between;font-size:11px;color:rgba(247,237,224,0.6);background:rgba(255,255,255,0.03);border-radius:8px;padding:6px 10px;}
+  .stock-use b{color:rgba(247,237,224,0.85);font-weight:500;}
+  .stock-use.low{color:var(--red);background:rgba(220,60,60,0.08);}
+  .stock-use.low b{color:var(--red);}
+  .stock-none{font-size:11px;color:rgba(247,237,224,0.3);margin-top:8px;}
+  .stock-adjust{display:flex;gap:8px;margin-top:12px;align-items:center;}
+  .stock-adjust input{flex:1;}
+  .stock-adjust button{white-space:nowrap;background:rgba(232,98,26,0.15);border:1px solid rgba(232,98,26,0.35);color:var(--ol);border-radius:8px;padding:9px 12px;font-size:11px;cursor:pointer;font-family:'Mitr',sans-serif;}
+  .stock-group-heading{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ol);margin:18px 0 8px;font-weight:600;}
+  .stock-group-heading:first-child{margin-top:0;}
+  .stock-dismiss{background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:2px 4px;opacity:.6;}
+  .stock-dismiss:active{opacity:1;}
+
+  .recipe-table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;}
+  .recipe-table{width:100%;border-collapse:collapse;font-size:12px;min-width:880px;}
+  .recipe-table th{text-align:left;padding:8px 10px;color:rgba(247,237,224,0.4);font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .recipe-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;color:rgba(247,237,224,0.85);}
+  .recipe-table tr:last-child td{border-bottom:none;}
+  .recipe-menu-name{font-weight:600;color:var(--cream);white-space:nowrap;}
+  .recipe-price{font-size:10px;color:rgba(247,237,224,0.3);font-weight:400;margin-top:2px;}
+  .recipe-item-line{display:block;margin-bottom:5px;}
+  .recipe-item-line:last-child{margin-bottom:0;}
+  .recipe-missing{color:rgba(247,237,224,0.3);font-style:italic;}
+  .recipe-dash{color:rgba(247,237,224,0.25);}
+  .recipe-note{display:block;font-size:10px;color:var(--ol);margin-top:2px;line-height:1.4;}
+  .recipe-cost{font-weight:600;color:var(--cream);white-space:nowrap;}
+  .recipe-profit{font-weight:700;white-space:nowrap;}
+  .recipe-profit.good{color:var(--green);}
+  .recipe-profit.bad{color:var(--red);}
+  .recipe-gp{display:block;font-size:9.5px;opacity:.7;font-weight:400;}
+  .recipe-flat-note{font-size:8.5px;color:rgba(247,237,224,0.35);display:block;margin-top:2px;}
+  .recipe-group-row td{background:rgba(232,98,26,0.06);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ol);font-weight:600;padding:8px 10px;border-bottom:1px solid rgba(232,98,26,0.15);}
+
+  .range-chip.selected{border-color:var(--orange);background:rgba(232,98,26,0.15);color:var(--ol);font-weight:600;}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .stat-box{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+  .stat-label{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:rgba(247,237,224,0.4);margin-bottom:6px;}
+  .stat-val{font-size:18px;font-weight:700;color:var(--cream);}
+  .stat-val.good{color:var(--green);} .stat-val.bad{color:var(--red);}
+  .stat-sub{font-size:10.5px;color:rgba(247,237,224,0.4);margin-top:3px;}
+  .unpaid-note{font-size:11px;color:var(--ol);margin-top:10px;text-align:center;}
+  .carryover-note{font-size:10.5px;color:rgba(247,237,224,0.45);margin-top:10px;text-align:center;font-style:italic;line-height:1.5;}
+  .freebie-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);}
+  .freebie-row:last-child{border-bottom:none;}
+  .lowstock-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--red);}
+  .lowstock-row:last-child{border-bottom:none;}
+
+  .fb-item{padding:12px 0;border-bottom:1px solid var(--border);}
+  .fb-item:last-child{border-bottom:none;}
+  .fb-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .fb-menu{font-size:13px;font-weight:500;color:var(--cream);}
+  .fb-rating{font-size:13px;font-weight:700;white-space:nowrap;}
+  .fb-rating.r5,.fb-rating.r4{color:var(--green);}
+  .fb-rating.r3{color:var(--ol);}
+  .fb-rating.r2,.fb-rating.r1{color:var(--red);}
+  .fb-sub{font-size:10px;color:rgba(247,237,224,0.4);margin-top:2px;}
+  .fb-comment{font-size:12px;color:rgba(247,237,224,0.75);margin-top:6px;line-height:1.5;background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 10px;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="htag">🐱 กาแฟแมวส้ม</div>
+  <h1>จัดซื้อ & สูตรชง</h1>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="purchase">จัดซื้อ</div>
+  <div class="tab" data-tab="stock">สต็อก</div>
+  <div class="tab" data-tab="recipe">สูตรชง</div>
+  <div class="tab" data-tab="report">รายงาน</div>
+  <div class="tab" data-tab="feedback">ฟีดแบค</div>
+</div>
+
+<!-- ============ TAB 1: PURCHASING ============ -->
+<div class="view active" id="view-purchase">
+
+  <div class="card">
+    <div class="card-title">บันทึกการซื้อของเข้าร้าน</div>
+
+    <label>ชื่อสินค้า</label>
+    <select id="p-name-select">
+      <option value="">กำลังโหลดรายชื่อวัตถุดิบ...</option>
+    </select>
+    <div class="field-hint" id="p-name-hint" style="display:none;"></div>
+    <input id="p-name" type="text" placeholder="พิมพ์ชื่อวัตถุดิบใหม่..." style="display:none;margin-top:8px;">
+    <div class="hist-toggle" id="p-hist-toggle">ประวัติที่เคยกรอก ▾</div>
+    <div class="hist-panel" id="p-hist-panel" style="display:none;"><div class="hist-empty">กำลังโหลด...</div></div>
+
+    <label>หมวดหมู่</label>
+    <select id="p-category">
+      <option value="coffee_bean">เมล็ดกาแฟ</option>
+      <option value="milk">นม/ครีม</option>
+      <option value="syrup">ไซรัป/ผง</option>
+      <option value="base">เบส (มัทฉะ/ชาไทย/โกโก้)</option>
+      <option value="packaging">แพ็กเกจจิ้ง</option>
+      <option value="equipment">อุปกรณ์</option>
+      <option value="other">อื่นๆ</option>
+    </select>
+
+    <div class="row2">
+      <div>
+        <label>จำนวนที่ซื้อ</label>
+        <input id="p-qty" type="number" step="any" placeholder="200">
+      </div>
+      <div>
+        <label>หน่วย</label>
+        <select id="p-unit">
+          <option value="g">กรัม (g)</option>
+          <option value="kg">กิโลกรัม (kg)</option>
+          <option value="ml">มิลลิลิตร (ml)</option>
+          <option value="l">ลิตร (l)</option>
+          <option value="piece">ชิ้น</option>
+          <option value="set">ชุด</option>
+        </select>
+      </div>
+    </div>
+
+    <label>ราคารวมที่จ่าย (บาท)</label>
+    <input id="p-cost" type="number" step="any" placeholder="143">
+
+    <div class="row2">
+      <div>
+        <label>ซัพพลายเออร์</label>
+        <input id="p-supplier" type="text" placeholder="เช่น StayHere Coffee">
+      </div>
+      <div>
+        <label>วันที่ซื้อ</label>
+        <input id="p-date" type="date">
+      </div>
+    </div>
+
+    <label>หมายเหตุ</label>
+    <input id="p-notes" type="text" placeholder="ไม่บังคับ">
+
+    <div class="checkrow">
+      <input type="checkbox" id="p-updatecost" checked>
+      <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ปิดถ้าเป็นการซื้ออุปกรณ์</span>
+    </div>
+
+    <button class="btn" id="p-submit">บันทึกการซื้อ</button>
+    <div class="status" id="p-status"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">รายการซื้อล่าสุด</div>
+    <div id="p-log"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+</div>
+
+<!-- ============ TAB 2: STOCK ============ -->
+<div class="view" id="view-stock">
+
+  <div class="card">
+    <div class="card-title">สต็อกคงเหลือ</div>
+    <div id="s-list"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+</div>
+
+<!-- ============ TAB 3: RECIPES ============ -->
+<div class="view" id="view-recipe">
+
+  <div class="card">
+    <div class="card-title">สูตรชง — 1 เมนู 1 แถวเสมอ</div>
+    <div class="recipe-table-wrap">
+      <table class="recipe-table">
+        <thead>
+          <tr><th>เมนู</th><th>ราคาขาย</th><th>เบส</th><th>ส่วนผสม</th><th>ปรุงรส</th><th>ต้นทุนรวม</th><th>กำไร</th></tr>
+        </thead>
+        <tbody id="recipe-table-body">
+          <tr><td colspan="7" class="loading">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--ol);">แก้สูตร?</div>
+    <div style="font-size:12px;color:rgba(247,237,224,0.6);line-height:1.7;">
+      หน้านี้เป็นหน้าดูอย่างเดียว — บอกในแชทกับ Claude ได้เลยว่าอยากปรับสูตรเมนูไหน ปริมาณเท่าไหร่ จะอัปเดตให้ในระบบทันที ไม่ต้องกรอกฟอร์มเอง
+    </div>
+  </div>
+
+</div>
+
+<!-- ============ TAB 4: REPORT ============ -->
+<div class="view" id="view-report">
+
+  <div class="card">
+    <div class="card-title">ช่วงเวลา</div>
+    <div class="chip-row" id="reportRangeRow">
+      <button type="button" class="chip range-chip selected" data-range="all">ทั้งหมด</button>
+      <button type="button" class="chip range-chip" data-range="today">วันนี้</button>
+      <button type="button" class="chip range-chip" data-range="7">7 วัน</button>
+      <button type="button" class="chip range-chip" data-range="30">30 วัน</button>
+      <button type="button" class="chip range-chip" data-range="custom">กำหนดเอง</button>
+    </div>
+    <div class="row2" id="reportCustomRange" style="display:none;margin-top:10px;">
+      <div>
+        <label>จากวันที่</label>
+        <input type="date" id="reportFrom">
+      </div>
+      <div>
+        <label>ถึงวันที่</label>
+        <input type="date" id="reportTo">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" id="reportPeriodLabel">สรุปยอด</div>
+    <div id="reportSummary"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">แยกตามเมนู</div>
+    <div class="recipe-table-wrap">
+      <table class="recipe-table" id="reportMenuTable">
+        <thead>
+          <tr><th>เมนู</th><th>แก้ว</th><th>ยอดขาย</th><th>ต้นทุน</th><th>กำไร</th></tr>
+        </thead>
+        <tbody id="reportMenuBody">
+          <tr><td colspan="5" class="loading">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">แยกตามลูกค้า</div>
+    <div class="recipe-table-wrap">
+      <table class="recipe-table" id="reportCustomerTable">
+        <thead>
+          <tr><th>ลูกค้า</th><th>แก้ว</th><th>ยอดขาย</th></tr>
+        </thead>
+        <tbody id="reportCustomerBody">
+          <tr><td colspan="3" class="loading">กำลังโหลด...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--ol);">☕ ของกินเอง / 🎁 แจกฟรี</div>
+    <div id="reportFreebies"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--red);">🔴 สต็อกใกล้หมด</div>
+    <div id="reportLowStock"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+</div>
+
+<!-- ============ TAB 5: FEEDBACK ============ -->
+<div class="view" id="view-feedback">
+
+  <div class="card">
+    <div class="card-title">คะแนนเฉลี่ยตามเมล็ด</div>
+    <div id="fbBeanSummary"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">รายการฟีดแบคล่าสุด</div>
+    <div id="fbList"><div class="loading">กำลังโหลด...</div></div>
+  </div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL = "https://nhzjnutvirjgiclkkfgx.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oempudXR2aXJqZ2ljbGtrZmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxMjc3NjEsImV4cCI6MjA5ODcwMzc2MX0.Bv2zsjmo3yd9YpmfxUAmXf-aaFy7SbY77fmM_k4f7eg";
+
+async function sb(path, opts = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": opts.prefer || "return=representation",
+      ...(opts.headers || {})
+    }
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(t || res.statusText);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+const CAT_LABEL = {coffee_bean:"เมล็ดกาแฟ", milk:"นม/ครีม", syrup:"ไซรัป/ผง", packaging:"แพ็กเกจจิ้ง", equipment:"อุปกรณ์", base:"เบส (มัทฉะ/ชาไทย/โกโก้)", other:"อื่นๆ"};
+
+// วัตถุดิบ 1 ตัวมักถูกใช้ในหลายเมนู/หลายปริมาณต่อแก้ว — ใช้เมนูที่ใช้เยอะที่สุด (worst case) เพื่อประเมินแบบระวังไว้ก่อน
+async function computeCupsRemainingMap(ingredients) {
+  const recipeRows = await sb('menu_recipes?select=ingredient_id,quantity');
+  const byIngredient = {};
+  recipeRows.forEach(r => {
+    if (!r.ingredient_id) return;
+    (byIngredient[r.ingredient_id] = byIngredient[r.ingredient_id] || []).push(Number(r.quantity));
+  });
+  const map = {};
+  ingredients.forEach(i => {
+    const stock = Number(i.stock_quantity);
+    if (i.category === 'coffee_bean') {
+      map[i.id] = Math.floor(stock / 20); // โดสกาแฟมาตรฐาน 20g/แก้ว
+      return;
+    }
+    const qtys = byIngredient[i.id];
+    if (!qtys || !qtys.length) { map[i.id] = null; return; }
+    const maxQtyPerCup = Math.max(...qtys);
+    map[i.id] = maxQtyPerCup > 0 ? Math.floor(stock / maxQtyPerCup) : null;
+  });
+  return map;
+}
+
+// ---------- TABS ----------
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("view-" + tab.dataset.tab).classList.add("active");
+    if (tab.dataset.tab === "stock" && !stockLoaded) { stockLoaded = true; loadStockTab(); }
+    if (tab.dataset.tab === "report") { loadReportTab(); }
+    if (tab.dataset.tab === "feedback" && !feedbackLoaded) { feedbackLoaded = true; loadFeedbackTab(); }
+  });
+});
+
+// ---------- PURCHASE TAB ----------
+document.getElementById("p-date").valueAsDate = new Date();
+
+async function loadPurchaseLog() {
+  const el = document.getElementById("p-log");
+  try {
+    const rows = await sb("purchase_log?select=*&order=created_at.desc&limit=20");
+    if (!rows.length) { el.innerHTML = '<div class="empty">ยังไม่มีรายการซื้อ</div>'; return; }
+    el.innerHTML = rows.map(r => `
+      <div class="log-item">
+        <div class="log-left">
+          <span class="cat-pill">${CAT_LABEL[r.category] || r.category}</span>${r.item_name}
+          <div class="log-sub">${r.purchase_date} ${r.supplier ? "· " + r.supplier : ""}</div>
+        </div>
+        <div class="log-right">
+          <div style="text-align:right;">฿${Number(r.total_cost).toLocaleString()}<div class="log-sub">${r.quantity}${r.unit} · ฿${Number(r.unit_cost).toFixed(2)}/${r.unit}</div></div>
+          <button class="log-del" data-id="${r.id}" data-name="${r.item_name.replace(/"/g,'&quot;')}" title="ลบรายการนี้">✕</button>
+        </div>
+      </div>
+    `).join("");
+
+    el.querySelectorAll(".log-del").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm(`ลบรายการซื้อ "${btn.dataset.name}" นี้ใช่ไหม? (ถ้ารายการนี้เคยอัปเดตต้นทุนอ้างอิงไว้ ต้นทุนนั้นจะไม่ถูกย้อนคืนอัตโนมัติ)`)) return;
+        try {
+          await sb(`purchase_log?id=eq.${btn.dataset.id}`, { method: "DELETE" });
+          loadPurchaseLog();
+          loadHistory();
+        } catch (e) {
+          alert("ลบไม่สำเร็จ: " + e.message);
+        }
+      });
+    });
+  } catch (e) {
+    el.innerHTML = '<div class="empty">โหลดไม่สำเร็จ: ' + e.message + '</div>';
+  }
+}
+loadPurchaseLog();
+
+// ---------- INGREDIENT DROPDOWN (กันชื่อซ้ำ — เลือกจากของที่มีอยู่แล้วเสมอ) ----------
+const CAT_ORDER = ["coffee_bean","base","milk","syrup","packaging","equipment","other"];
+async function loadIngredientDropdown() {
+  const sel = document.getElementById("p-name-select");
+  try {
+    const rows = await sb("ingredients?select=id,name,category&active=eq.true&order=category,name");
+    const byCat = {};
+    rows.forEach(r => { (byCat[r.category] = byCat[r.category] || []).push(r); });
+    let html = '<option value="">— เลือกวัตถุดิบ —</option>';
+    html += '<option value="__new__">➕ วัตถุดิบใหม่ที่ยังไม่มีในระบบ</option>';
+    CAT_ORDER.forEach(cat => {
+      if (!byCat[cat]) return;
+      html += `<optgroup label="${CAT_LABEL[cat] || cat}">`;
+      html += byCat[cat].map(r => `<option value="${r.name.replace(/"/g,'&quot;')}">${r.name}</option>`).join("");
+      html += `</optgroup>`;
+    });
+    sel.innerHTML = html;
+  } catch (e) {
+    sel.innerHTML = '<option value="">โหลดไม่สำเร็จ</option>';
+  }
+}
+loadIngredientDropdown();
+
+function setNewItemMode(isNew) {
+  document.getElementById("p-name").style.display = isNew ? "block" : "none";
+  document.getElementById("p-name-hint").style.display = isNew ? "block" : "none";
+  document.getElementById("p-name-hint").textContent = isNew
+    ? "รายการนี้ยังไม่มีในระบบ — พิมพ์ชื่อให้ชัดเจน ครั้งหน้าจะเลือกจากลิสต์นี้ได้เลย ไม่ต้องพิมพ์ซ้ำ"
+    : "";
+  if (isNew) document.getElementById("p-name").focus();
+}
+document.getElementById("p-name-select").addEventListener("change", (e) => {
+  setNewItemMode(e.target.value === "__new__");
+});
+
+// ---------- HISTORY TOGGLE ----------
+let historyLoaded = false;
+async function loadHistory() {
+  const panel = document.getElementById("p-hist-panel");
+  try {
+    const rows = await sb("purchase_log?select=item_name,category,quantity,unit,supplier,created_at&order=created_at.desc&limit=200");
+    const seen = new Set();
+    const distinct = [];
+    for (const r of rows) {
+      const key = r.item_name.trim().toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      distinct.push(r);
+    }
+    if (!distinct.length) {
+      panel.innerHTML = '<div class="hist-empty">ยังไม่มีประวัติ</div>';
+      return;
+    }
+    panel.innerHTML = distinct.map(r => `
+      <div class="hist-chip" data-name="${r.item_name.replace(/"/g,'&quot;')}" data-category="${r.category}" data-qty="${r.quantity}" data-unit="${r.unit}" data-supplier="${(r.supplier||'').replace(/"/g,'&quot;')}">
+        <b>${r.item_name}</b><span>${r.quantity}${r.unit}${r.supplier ? " · " + r.supplier : ""}</span>
+      </div>
+    `).join("");
+    panel.querySelectorAll(".hist-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        const sel = document.getElementById("p-name-select");
+        const matchOpt = Array.from(sel.options).find(o => o.value === chip.dataset.name);
+        if (matchOpt) {
+          sel.value = chip.dataset.name;
+          setNewItemMode(false);
+        } else {
+          sel.value = "__new__";
+          setNewItemMode(true);
+          document.getElementById("p-name").value = chip.dataset.name;
+        }
+        document.getElementById("p-category").value = chip.dataset.category;
+        document.getElementById("p-qty").value = chip.dataset.qty;
+        document.getElementById("p-unit").value = chip.dataset.unit;
+        document.getElementById("p-supplier").value = chip.dataset.supplier;
+        document.getElementById("p-cost").focus();
+        panel.style.display = "none";
+        document.getElementById("p-hist-toggle").textContent = "ประวัติที่เคยกรอก ▾";
+      });
+    });
+  } catch (e) {
+    panel.innerHTML = '<div class="hist-empty">โหลดประวัติไม่สำเร็จ</div>';
+  }
+}
+
+document.getElementById("p-hist-toggle").addEventListener("click", () => {
+  const panel = document.getElementById("p-hist-panel");
+  const toggle = document.getElementById("p-hist-toggle");
+  const willShow = panel.style.display === "none";
+  panel.style.display = willShow ? "flex" : "none";
+  toggle.textContent = willShow ? "ประวัติที่เคยกรอก ▲" : "ประวัติที่เคยกรอก ▾";
+  if (willShow && !historyLoaded) { historyLoaded = true; loadHistory(); }
+});
+
+document.getElementById("p-submit").addEventListener("click", async () => {
+  const btn = document.getElementById("p-submit");
+  const status = document.getElementById("p-status");
+  status.className = "status"; status.style.display = "none";
+
+  const selVal = document.getElementById("p-name-select").value;
+  const name = selVal === "__new__"
+    ? document.getElementById("p-name").value.trim()
+    : selVal;
+  const category = document.getElementById("p-category").value;
+  const qty = parseFloat(document.getElementById("p-qty").value);
+  const unit = document.getElementById("p-unit").value;
+  const cost = parseFloat(document.getElementById("p-cost").value);
+  const supplier = document.getElementById("p-supplier").value.trim() || null;
+  const date = document.getElementById("p-date").value;
+  const notes = document.getElementById("p-notes").value.trim() || null;
+  const updateCost = document.getElementById("p-updatecost").checked;
+
+  if (!name || !qty || !cost || !unit) {
+    status.textContent = "กรอกชื่อสินค้า จำนวน และราคาให้ครบก่อนนะ";
+    status.className = "status err"; return;
+  }
+
+  btn.disabled = true; btn.textContent = "กำลังบันทึก...";
+  try {
+    let ingredientId = null;
+
+    if (updateCost && category !== "equipment") {
+      const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity`);
+      if (existing && existing.length) {
+        ingredientId = existing[0].id;
+        const newStock = Number(existing[0].stock_quantity || 0) + qty;
+        await sb(`ingredients?id=eq.${ingredientId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            purchase_unit_size: qty, purchase_unit_cost: cost,
+            base_unit: unit, supplier: supplier, stock_quantity: newStock, updated_at: new Date().toISOString()
+          })
+        });
+      } else {
+        const created = await sb("ingredients", {
+          method: "POST",
+          body: JSON.stringify([{
+            name, category, base_unit: unit,
+            purchase_unit_size: qty, purchase_unit_cost: cost, supplier, notes, stock_quantity: qty
+          }])
+        });
+        ingredientId = created[0].id;
+      }
+    }
+
+    await sb("purchase_log", {
+      method: "POST",
+      body: JSON.stringify([{
+        item_name: name, category, quantity: qty, unit, total_cost: cost,
+        supplier, purchase_date: date, notes, ingredient_id: ingredientId
+      }])
+    });
+
+    status.textContent = ingredientId ? "บันทึกแล้ว — อัปเดตต้นทุนอ้างอิงด้วย ✓" : "บันทึกแล้ว ✓";
+    status.className = "status ok";
+    document.getElementById("p-name-select").value = "";
+    document.getElementById("p-name").value = "";
+    setNewItemMode(false);
+    document.getElementById("p-qty").value = "";
+    document.getElementById("p-cost").value = "";
+    document.getElementById("p-supplier").value = "";
+    document.getElementById("p-notes").value = "";
+    loadPurchaseLog();
+    loadIngredientDropdown();
+    historyLoaded = false;
+    stockLoaded = false;
+  } catch (e) {
+    status.textContent = "บันทึกไม่สำเร็จ: " + e.message;
+    status.className = "status err";
+  } finally {
+    btn.disabled = false; btn.textContent = "บันทึกการซื้อ";
+  }
+});
+
+// ---------- STOCK TAB ----------
+let stockLoaded = false;
+async function loadStockTab() {
+  const listEl = document.getElementById("s-list");
+  listEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+  try {
+    const ings = await sb("ingredients?select=*&active=eq.true&order=category,name");
+
+    if (!ings.length) {
+      listEl.innerHTML = '<div class="empty">ยังไม่มีวัตถุดิบในระบบ</div>';
+      return;
+    }
+
+    const cupsMap = await computeCupsRemainingMap(ings);
+    const lowItems = ings.filter(i => cupsMap[i.id] !== null && cupsMap[i.id] < 2);
+
+    const GROUPS = [
+      { title: "เบส", match: c => c === "coffee_bean" || c === "base" },
+      { title: "มิกเซอร์", match: c => c === "milk" || c === "other" },
+      { title: "ปรุงแต่ง", match: c => c === "syrup" },
+      { title: "อื่นๆ", match: c => !["coffee_bean", "base", "milk", "other", "syrup"].includes(c) },
+    ];
+
+    let html = "";
+    if (lowItems.length) {
+      html += `<div style="background:rgba(220,60,60,0.1);border:1px solid rgba(220,100,100,0.3);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px;">🔴 ควรซื้อเพิ่มด่วน — วัตถุดิบเหล่านี้ไม่พอสำหรับ 2 แก้วขึ้นไป</div>
+        ${lowItems.map(i => `<div style="font-size:11px;color:rgba(247,237,224,0.75);padding:2px 0;">${i.name} — ทำได้อีกแค่ <b style="color:var(--red);">${cupsMap[i.id]} แก้ว</b> (เหลือ ${Number(i.stock_quantity).toLocaleString()}${i.base_unit})</div>`).join("")}
+      </div>`;
+    }
+    GROUPS.forEach(g => {
+      const items = ings.filter(i => g.match(i.category));
+      if (!items.length) return;
+      html += `<div class="stock-group-heading">${g.title}</div>`;
+      html += items.map(i => {
+        const cups = cupsMap[i.id];
+        const lowWarning = cups !== null && cups < 2
+          ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
+          : "";
+        return `
+        <div class="stock-card" data-ing-id="${i.id}">
+          <div class="stock-head">
+            <div>
+              <div class="stock-name">${i.name}</div>
+              <div class="stock-sub">${CAT_LABEL[i.category] || i.category}${i.supplier ? " · " + i.supplier : ""}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="stock-qty">${Number(i.stock_quantity).toLocaleString()} ${i.base_unit}</div>
+              <button class="stock-dismiss" data-id="${i.id}" data-name="${i.name.replace(/"/g,'&quot;')}" title="ซ่อนออกจากลิสต์">✕</button>
+            </div>
+          </div>
+          ${lowWarning}
+          <div class="stock-adjust">
+            <input type="number" step="any" class="s-adjust-input" placeholder="ปรับยอดสต็อกเป็น...">
+            <button class="s-adjust-btn" data-id="${i.id}">บันทึกยอดใหม่</button>
+          </div>
+        </div>
+      `;
+      }).join("");
+    });
+
+    listEl.innerHTML = html;
+
+    listEl.querySelectorAll(".stock-dismiss").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        if (!confirm(`ซ่อน "${btn.dataset.name}" ออกจากลิสต์สต็อกใช่ไหม? (ไม่ลบข้อมูล แค่ไม่โชว์ในหน้านี้ — ถ้าซื้อใหม่อีกครั้งบอกในแชทให้เปิดกลับมาได้)`)) return;
+        try {
+          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ active: false, updated_at: new Date().toISOString() })
+          });
+          loadStockTab();
+        } catch (e) {
+          alert("ซ่อนไม่สำเร็จ: " + e.message);
+        }
+      });
+    });
+
+    listEl.querySelectorAll(".s-adjust-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const card = btn.closest(".stock-card");
+        const input = card.querySelector(".s-adjust-input");
+        const val = parseFloat(input.value);
+        if (isNaN(val)) { alert("กรอกตัวเลขก่อนนะ"); return; }
+        btn.disabled = true; btn.textContent = "กำลังบันทึก...";
+        try {
+          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ stock_quantity: val, updated_at: new Date().toISOString() })
+          });
+          loadStockTab();
+        } catch (e) {
+          alert("ปรับยอดไม่สำเร็จ: " + e.message);
+          btn.disabled = false; btn.textContent = "บันทึกยอดใหม่";
+        }
+      });
+    });
+  } catch (e) {
+    listEl.innerHTML = '<div class="empty">โหลดไม่สำเร็จ: ' + e.message + '</div>';
+  }
+}
+
+// ---------- RECIPE TAB (read-only) ----------
+const BEAN_DOSE_DISPLAY = 20;
+const FLAT_COFFEE_COST = 20;
+let recipeTableLoaded = false;
+
+const DRINK_GROUPS = [
+  { title: "☕ กาแฟ", match: c => ["espresso","dirty","signature"].includes(c) },
+  { title: "🍵 มัทฉะ", match: c => c === "matcha" },
+  { title: "🧋 ชาไทย", match: c => c === "thai_tea" },
+  { title: "🍫 โกโก้", match: c => c === "cocoa" },
+  { title: "🥤 อื่นๆ", match: c => !["espresso","dirty","signature","matcha","thai_tea","cocoa"].includes(c) },
+];
+
+function renderRecipeLines(rows, emptyClass) {
+  if (!rows.length) return `<span class="${emptyClass}">${emptyClass === 'recipe-dash' ? '—' : 'ยังไม่ได้กรอก'}</span>`;
+  return rows.map(r => `
+    <span class="recipe-item-line">${r.ingredients.name} ${r.quantity}${r.ingredients.base_unit}${r.notes ? `<span class="recipe-note">📝 ${r.notes}</span>` : ""}</span>
+  `).join("");
+}
+
+function renderMenuRow(m, byMenu) {
+  const rows = byMenu[m.id] || [];
+  const baseRows = rows.filter(r => r.ingredients.category === "base");
+  const mixerRows = rows.filter(r => ["milk", "other"].includes(r.ingredients.category));
+  const flavorRows = rows.filter(r => r.ingredients.category === "syrup");
+  const hasNoRecipeAtAll = rows.length === 0 && !m.needs_bean;
+
+  const baseHtml = m.needs_bean
+    ? `<span class="recipe-item-line">กาแฟ ${BEAN_DOSE_DISPLAY}g <span style="opacity:.5;">(เลือกเมล็ดตอนชง)</span></span>`
+    : renderRecipeLines(baseRows, "recipe-missing");
+
+  const ingredientCost = rows.reduce((sum, r) => sum + (r.quantity * (r.ingredients.cost_per_base_unit || 0)), 0);
+  const totalCost = ingredientCost + (m.needs_bean ? FLAT_COFFEE_COST : 0);
+  const profit = Number(m.price) - totalCost;
+  const gp = Number(m.price) ? (profit / Number(m.price) * 100) : 0;
+
+  const costHtml = hasNoRecipeAtAll
+    ? `<span class="recipe-missing">รอสูตร</span>`
+    : `<span class="recipe-cost">฿${totalCost.toFixed(2)}</span>${m.needs_bean ? '<span class="recipe-flat-note">รวมกาแฟ flat 20฿</span>' : ''}`;
+  const profitHtml = hasNoRecipeAtAll
+    ? `<span class="recipe-missing">—</span>`
+    : `<span class="recipe-profit ${profit >= 0 ? 'good' : 'bad'}">฿${profit.toFixed(2)}<span class="recipe-gp">${gp.toFixed(0)}%</span></span>`;
+
+  return `
+    <tr>
+      <td><div class="recipe-menu-name">${m.name}</div></td>
+      <td><span class="recipe-cost">฿${m.price}</span></td>
+      <td>${baseHtml}</td>
+      <td>${renderRecipeLines(mixerRows, "recipe-missing")}</td>
+      <td>${renderRecipeLines(flavorRows, "recipe-dash")}</td>
+      <td>${costHtml}</td>
+      <td>${profitHtml}</td>
+    </tr>
+  `;
+}
+
+async function loadRecipeTable() {
+  const body = document.getElementById("recipe-table-body");
+  body.innerHTML = '<tr><td colspan="7" class="loading">กำลังโหลด...</td></tr>';
+  try {
+    const [menuItems, recipes] = await Promise.all([
+      sb("menu_items?select=*&order=name"),
+      sb("menu_recipes?select=*,ingredients(name,category,base_unit,cost_per_base_unit)")
+    ]);
+
+    const byMenu = {};
+    recipes.forEach(r => {
+      if (!byMenu[r.menu_item_id]) byMenu[r.menu_item_id] = [];
+      byMenu[r.menu_item_id].push(r);
+    });
+
+    let html = "";
+    DRINK_GROUPS.forEach(g => {
+      const items = menuItems.filter(m => g.match(m.category));
+      if (!items.length) return;
+      html += `<tr class="recipe-group-row"><td colspan="7">${g.title}</td></tr>`;
+      html += items.map(m => renderMenuRow(m, byMenu)).join("");
+    });
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="7" class="empty">โหลดไม่สำเร็จ: ' + e.message + '</td></tr>';
+  }
+}
+loadRecipeTable();
+
+// ---------- REPORT TAB ----------
+const SWEETNESS_RULES_REPORT = {
+  'Coconut syrup': { 'หวานปกติ': 15, 'หวานน้อย': 7, 'ไม่หวาน': 0 },
+  'Syrup': { 'หวานปกติ': 15, 'หวานน้อย': 7, 'ไม่หวาน': 0 },
+  'Condensed milk': { 'หวานปกติ': 20, 'หวานน้อย': 10, 'ไม่หวาน': 0 },
+};
+const FLAT_BEAN_COST = 20;
+// วันที่ตัดยอด — ก่อนวันนี้นับจาก daily_sales_log (ยืนยันแล้วว่าถูกต้อง) ตั้งแต่วันนี้เป็นต้นไปนับจากออเดอร์จริงในระบบ (preorders) อัตโนมัติ
+const CUTOVER_DATE = new Date('2026-07-30T00:00:00');
+let reportRange = 'all';
+let earliestDateCache = null; // resolved lazily from DB, used by the "ทั้งหมด" range
+
+async function resolveEarliestDate() {
+  if (earliestDateCache) return earliestDateCache;
+  try {
+    const rows = await sb('daily_sales_log?select=sale_date&order=sale_date.asc&limit=1');
+    if (rows && rows.length) {
+      earliestDateCache = new Date(rows[0].sale_date + 'T00:00:00');
+      return earliestDateCache;
+    }
+  } catch (e) { /* fall through to cutover default */ }
+  earliestDateCache = new Date(CUTOVER_DATE);
+  return earliestDateCache;
+}
+
+async function getReportDateRange() {
+  const now = new Date();
+  let from, to;
+  if (reportRange === 'all') {
+    from = await resolveEarliestDate();
+    to = new Date(now); to.setHours(23,59,59,999);
+  } else if (reportRange === 'today') {
+    from = new Date(now); from.setHours(0,0,0,0);
+    to = new Date(now); to.setHours(23,59,59,999);
+  } else if (reportRange === 'custom') {
+    const fromVal = document.getElementById('reportFrom').value;
+    const toVal = document.getElementById('reportTo').value;
+    from = fromVal ? new Date(fromVal + 'T00:00:00') : await resolveEarliestDate();
+    to = toVal ? new Date(toVal + 'T23:59:59') : new Date();
+  } else {
+    const days = Number(reportRange);
+    to = new Date(now); to.setHours(23,59,59,999);
+    from = new Date(now); from.setDate(from.getDate() - (days - 1)); from.setHours(0,0,0,0);
+  }
+  return { from, to };
+}
+
+document.getElementById('reportRangeRow').addEventListener('click', (e) => {
+  const btn = e.target.closest('.range-chip');
+  if (!btn) return;
+  reportRange = btn.dataset.range;
+  document.querySelectorAll('.range-chip').forEach(b => b.classList.toggle('selected', b === btn));
+  document.getElementById('reportCustomRange').style.display = reportRange === 'custom' ? 'grid' : 'none';
+  if (reportRange !== 'custom') loadReportTab();
+});
+document.getElementById('reportFrom').addEventListener('change', loadReportTab);
+document.getElementById('reportTo').addEventListener('change', loadReportTab);
+
+async function loadReportTab() {
+  const { from, to } = await getReportDateRange();
+  document.getElementById('reportPeriodLabel').textContent =
+    `สรุปยอด (${from.toLocaleDateString('th-TH',{day:'numeric',month:'short'})} - ${to.toLocaleDateString('th-TH',{day:'numeric',month:'short'})})`;
+
+  const summaryEl = document.getElementById('reportSummary');
+  const menuBody = document.getElementById('reportMenuBody');
+  const freebiesEl = document.getElementById('reportFreebies');
+  const lowStockEl = document.getElementById('reportLowStock');
+  summaryEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+  menuBody.innerHTML = '<tr><td colspan="5" class="loading">กำลังโหลด...</td></tr>';
+  freebiesEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+  lowStockEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+
+  try {
+    const fromDateStr = from.toISOString().slice(0,10);
+    const toDateStr = to.toISOString().slice(0,10);
+    // preorders (ออเดอร์จริงจากระบบ) นับเฉพาะตั้งแต่ CUTOVER_DATE เป็นต้นไป — ก่อนหน้านั้นข้อมูล preorders ยังไม่ผ่านการตรวจสอบ ใช้ daily_sales_log แทน
+    const preorderFrom = from < CUTOVER_DATE ? CUTOVER_DATE : from;
+    const preorderFromISO = preorderFrom <= to ? preorderFrom.toISOString() : null;
+
+    const [orders, menuItems, recipes, beans, allIngredients, manualSales] = await Promise.all([
+      preorderFromISO
+        ? sb(`preorders?select=*&brewed=eq.true&brewed_at=gte.${preorderFromISO}&brewed_at=lte.${to.toISOString()}`)
+        : Promise.resolve([]),
+      sb('menu_items?select=*'),
+      sb('menu_recipes?select=quantity,menu_item_id,ingredients(name,category,cost_per_base_unit)'),
+      sb('ingredients?select=name,cost_per_base_unit&category=eq.coffee_bean'),
+      sb('ingredients?select=id,name,category,stock_quantity,base_unit&active=eq.true'),
+      sb(`daily_sales_log?select=quantity,revenue,total_cost&sale_date=gte.${fromDateStr}&sale_date=lte.${toDateStr}`)
+    ]);
+
+    const menuByName = {}; menuItems.forEach(m => menuByName[m.name] = m);
+    const recipeByMenuId = {};
+    recipes.forEach(r => { (recipeByMenuId[r.menu_item_id] = recipeByMenuId[r.menu_item_id] || []).push(r); });
+    const beanCost = {}; beans.forEach(b => beanCost[b.name] = Number(b.cost_per_base_unit));
+
+    function computeCost(order) {
+      const menu = menuByName[order.menu_item_name];
+      if (!menu) return 0;
+      let cost = 0;
+      if (menu.needs_bean) {
+        cost += (order.bean_name && beanCost[order.bean_name] !== undefined)
+          ? beanCost[order.bean_name] * 20
+          : FLAT_BEAN_COST;
+      }
+      const rows = recipeByMenuId[menu.id] || [];
+      rows.forEach(r => {
+        const ing = r.ingredients;
+        if (!ing || ing.category === 'coffee_bean') return;
+        let qty = Number(r.quantity);
+        const rule = SWEETNESS_RULES_REPORT[ing.name];
+        if (rule && rule[order.sweetness] !== undefined) qty = rule[order.sweetness];
+        cost += qty * Number(ing.cost_per_base_unit || 0);
+      });
+      return cost;
+    }
+
+    const customerOrders = orders.filter(o => o.order_type === 'customer' || !o.order_type);
+    const freeOrders = orders.filter(o => o.order_type === 'staff' || o.order_type === 'reward');
+
+    const REPORT_DRINK_GROUPS = [
+      { title: '☕ กาแฟ', match: c => ['espresso','dirty','signature'].includes(c) },
+      { title: '🍵 ชาเขียว', match: c => c === 'matcha' },
+      { title: '🥤 อื่นๆ', match: c => !['espresso','dirty','signature','matcha'].includes(c) },
+    ];
+
+    // byMenu/byCustomer/unpaid คำนวณจาก orders ซึ่งตอนนี้ query มาเฉพาะช่วงตั้งแต่ CUTOVER_DATE แล้ว (ออเดอร์จริงที่ยืนยันแล้วเท่านั้น)
+    const byMenu = {};
+    const byCustomer = {};
+    let unpaid = 0;
+    customerOrders.forEach(o => {
+      const cost = computeCost(o);
+      if (!o.paid) unpaid += Number(o.price);
+      if (!byMenu[o.menu_item_name]) byMenu[o.menu_item_name] = { qty: 0, revenue: 0, cogs: 0 };
+      byMenu[o.menu_item_name].qty += 1;
+      byMenu[o.menu_item_name].revenue += Number(o.price);
+      byMenu[o.menu_item_name].cogs += cost;
+
+      const custName = o.customer_name || 'ไม่ระบุชื่อ';
+      if (!byCustomer[custName]) byCustomer[custName] = { qty: 0, revenue: 0 };
+      byCustomer[custName].qty += 1;
+      byCustomer[custName].revenue += Number(o.price);
+    });
+
+    // Big Numbers = ยอดยกมาจาก daily_sales_log (ก่อน 30 ก.ค. 2569) + ออเดอร์จริงจากระบบตั้งแต่ 30 ก.ค. 2569 เป็นต้นไป
+    const manualQty = (manualSales || []).reduce((s, r) => s + Number(r.quantity), 0);
+    const manualRevenue = (manualSales || []).reduce((s, r) => s + Number(r.revenue), 0);
+    const manualCost = (manualSales || []).reduce((s, r) => s + Number(r.total_cost), 0);
+
+    const liveRevenue = customerOrders.reduce((s, o) => s + Number(o.price), 0);
+    const liveCost = customerOrders.reduce((s, o) => s + computeCost(o), 0);
+    const liveCups = customerOrders.length;
+
+    const revenue = manualRevenue + liveRevenue;
+    const cogs = manualCost + liveCost;
+    const totalCups = manualQty + liveCups;
+
+    const profit = revenue - cogs;
+    const gp = revenue ? (profit / revenue * 100) : 0;
+
+    summaryEl.innerHTML = `
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-label">ยอดขาย</div><div class="stat-val">฿${revenue.toLocaleString(undefined,{maximumFractionDigits:0})}</div><div class="stat-sub">${totalCups} แก้ว</div></div>
+        <div class="stat-box"><div class="stat-label">ต้นทุน</div><div class="stat-val">฿${cogs.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+        <div class="stat-box"><div class="stat-label">กำไรสุทธิ</div><div class="stat-val ${profit>=0?'good':'bad'}">฿${profit.toLocaleString(undefined,{maximumFractionDigits:0})}</div></div>
+        <div class="stat-box"><div class="stat-label">GP%</div><div class="stat-val ${gp>=0?'good':'bad'}">${gp.toFixed(1)}%</div></div>
+      </div>
+      <div class="carryover-note">ℹ️ ยกยอดมา (จนถึง 29 ก.ค. 2569): ฿${manualRevenue.toLocaleString(undefined,{maximumFractionDigits:0})} · ${manualQty} แก้ว — ตั้งแต่ 30 ก.ค. 2569 นับจากออเดอร์จริงในระบบอัตโนมัติ: ฿${liveRevenue.toLocaleString(undefined,{maximumFractionDigits:0})} · ${liveCups} แก้ว</div>
+      ${unpaid > 0 ? `<div class="unpaid-note">⚠️ ในนี้ยังไม่ได้เก็บเงิน ฿${unpaid.toLocaleString(undefined,{maximumFractionDigits:0})}</div>` : ''}
+    `;
+
+    let menuHtml = '';
+    REPORT_DRINK_GROUPS.forEach(g => {
+      const entries = Object.entries(byMenu).filter(([name]) => {
+        const menu = menuByName[name];
+        return menu && g.match(menu.category);
+      }).sort((a,b) => b[1].revenue - a[1].revenue);
+      if (!entries.length) return;
+      menuHtml += `<tr class="recipe-group-row"><td colspan="5">${g.title}</td></tr>`;
+      menuHtml += entries.map(([name, d]) => {
+        const p = d.revenue - d.cogs;
+        return `<tr>
+          <td>${name}</td>
+          <td>${d.qty}</td>
+          <td>฿${d.revenue.toFixed(0)}</td>
+          <td>฿${d.cogs.toFixed(0)}</td>
+          <td><span class="recipe-profit ${p>=0?'good':'bad'}">฿${p.toFixed(0)}</span></td>
+        </tr>`;
+      }).join("");
+    });
+    menuBody.innerHTML = menuHtml || '<tr><td colspan="5" class="empty">ไม่มีออเดอร์ในช่วงนี้</td></tr>';
+
+    const sortedCustomers = Object.entries(byCustomer).sort((a,b) => b[1].revenue - a[1].revenue);
+    const customerBody = document.getElementById('reportCustomerBody');
+    customerBody.innerHTML = sortedCustomers.length
+      ? sortedCustomers.map(([name, d]) => `<tr>
+          <td>${name}</td>
+          <td>${d.qty}</td>
+          <td>฿${d.revenue.toFixed(0)}</td>
+        </tr>`).join("")
+      : '<tr><td colspan="3" class="empty">ไม่มีออเดอร์ในช่วงนี้</td></tr>';
+
+    const staffCount = orders.filter(o => o.order_type === 'staff').length;
+    const rewardCount = orders.filter(o => o.order_type === 'reward').length;
+    const freeCost = freeOrders.reduce((sum,o) => sum + computeCost(o), 0);
+    freebiesEl.innerHTML = `
+      <div class="freebie-row"><span>☕ Staff กินเอง</span><span>${staffCount} แก้ว</span></div>
+      <div class="freebie-row"><span>🎁 แลกแต้ม/แจกฟรี</span><span>${rewardCount} แก้ว</span></div>
+      <div class="freebie-row"><b>รวมต้นทุนที่เสียไป</b><b>฿${freeCost.toFixed(0)}</b></div>
+    `;
+
+    const cupsMap = await computeCupsRemainingMap(allIngredients);
+    const lowStock = allIngredients.filter(i => cupsMap[i.id] !== null && cupsMap[i.id] < 2).sort((a,b)=>cupsMap[a.id]-cupsMap[b.id]);
+    lowStockEl.innerHTML = lowStock.length
+      ? lowStock.map(i => `<div class="lowstock-row"><span>${i.name}</span><span>ทำได้อีก ${cupsMap[i.id]} แก้ว (${Number(i.stock_quantity).toLocaleString()}${i.base_unit})</span></div>`).join("")
+      : '<div class="empty">สต็อกทุกตัวยังเพียงพอ 🎉</div>';
+
+  } catch (e) {
+    summaryEl.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${e.message}</div>`;
+  }
+}
+
+// ---------- FEEDBACK TAB ----------
+let feedbackLoaded = false;
+
+function fmtDateTimeFb(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'}) + ' ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+}
+
+async function loadFeedbackTab() {
+  const beanSummaryEl = document.getElementById('fbBeanSummary');
+  const listEl = document.getElementById('fbList');
+  beanSummaryEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+  listEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+
+  try {
+    const rows = await sb('feedback_requests?select=*&rating=not.is.null&order=responded_at.desc&limit=100');
+
+    if (!rows.length) {
+      beanSummaryEl.innerHTML = '<div class="empty">ยังไม่มีฟีดแบคเข้ามา</div>';
+      listEl.innerHTML = '<div class="empty">ยังไม่มีฟีดแบคเข้ามา</div>';
+      return;
+    }
+
+    // สรุปคะแนนเฉลี่ยตามเมล็ด (เฉพาะแถวที่มี bean_name)
+    const byBean = {};
+    rows.forEach(r => {
+      if (!r.bean_name) return;
+      if (!byBean[r.bean_name]) byBean[r.bean_name] = { sum: 0, count: 0 };
+      byBean[r.bean_name].sum += Number(r.rating);
+      byBean[r.bean_name].count += 1;
+    });
+    const beanEntries = Object.entries(byBean).sort((a,b) => (b[1].sum/b[1].count) - (a[1].sum/a[1].count));
+
+    beanSummaryEl.innerHTML = beanEntries.length
+      ? beanEntries.map(([bean, d]) => {
+          const avg = d.sum / d.count;
+          return `<div class="freebie-row"><span>${bean}</span><span>${avg.toFixed(1)}/5 <span style="color:rgba(247,237,224,0.4);">(${d.count} ครั้ง)</span></span></div>`;
+        }).join('')
+      : '<div class="empty">ยังไม่มีฟีดแบคที่ผูกกับเมล็ดโดยตรง</div>';
+
+    listEl.innerHTML = rows.map(r => `
+      <div class="fb-item">
+        <div class="fb-top">
+          <span class="fb-menu">${r.menu_item_name}</span>
+          <span class="fb-rating r${r.rating}">${r.rating}/5</span>
+        </div>
+        <div class="fb-sub">${fmtDateTimeFb(r.responded_at)}${r.bean_name ? ' · 🌱 ' + r.bean_name : ''}${r.sweetness ? ' · ' + r.sweetness : ''}</div>
+        ${r.comment ? `<div class="fb-comment">${r.comment}</div>` : ''}
+      </div>
+    `).join('');
+
+  } catch (e) {
+    beanSummaryEl.innerHTML = `<div class="empty">โหลดไม่สำเร็จ: ${e.message}</div>`;
+    listEl.innerHTML = '';
+  }
+}
+
+</script>
+
+
+</body>
+</html>
