@@ -10,8 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:#1A1008; --card:#231508; --orange:#E8621A; --ol:#F5916A;
-    --cream:#F7EDE0; --border:rgba(255,255,255,0.08); --green:#8FBC8F; --red:#E88080;
+    --bg:#FFF8F0; --card:#FFFFFF; --orange:#E8863A; --ol:#A8876F;
+    --cream:#4A3428; --border:#F0E4D8; --green:#4A9B5C; --red:#D64545;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{background:var(--bg);font-family:'Mitr',sans-serif;color:var(--cream);padding-bottom:60px;}
@@ -22,20 +22,20 @@
   .header h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--cream);}
 
   .tabs{display:flex;gap:0;padding:16px 16px 0;position:sticky;top:0;background:var(--bg);z-index:10;}
-  .tab{flex:1;text-align:center;padding:12px 8px;font-size:13px;font-weight:500;color:rgba(247,237,224,0.45);border-bottom:2px solid var(--border);cursor:pointer;transition:.2s;}
+  .tab{flex:1;text-align:center;padding:12px 8px;font-size:13px;font-weight:500;color:rgba(74,52,40,0.45);border-bottom:2px solid var(--border);cursor:pointer;transition:.2s;}
   .tab.active{color:var(--ol);border-bottom-color:var(--orange);}
 
   .view{display:none;padding:20px 16px;max-width:640px;margin:0 auto;}
   .view.active{display:block;}
 
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px;}
-  .card-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(247,237,224,0.4);margin-bottom:14px;font-weight:500;}
+  .card-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(74,52,40,0.4);margin-bottom:14px;font-weight:500;}
 
-  label{display:block;font-size:11px;color:rgba(247,237,224,0.55);margin-bottom:5px;margin-top:12px;font-weight:300;}
+  label{display:block;font-size:11px;color:rgba(74,52,40,0.55);margin-bottom:5px;margin-top:12px;font-weight:300;}
   label:first-of-type{margin-top:0;}
   .field-hint{font-size:10.5px;color:var(--ol);margin:-6px 0 10px;}
   input, select, textarea{
-    width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:10px;
+    width:100%;background:rgba(74,52,40,0.05);border:1px solid var(--border);border-radius:10px;
     padding:10px 12px;color:var(--cream);font-family:'Mitr',sans-serif;font-size:13px;outline:none;
   }
   input:focus, select:focus, textarea:focus{border-color:rgba(232,98,26,0.5);}
@@ -43,9 +43,9 @@
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   .checkrow{display:flex;align-items:center;gap:8px;margin-top:14px;}
   .checkrow input{width:auto;}
-  .checkrow span{font-size:11px;color:rgba(247,237,224,0.55);font-weight:300;}
+  .checkrow span{font-size:11px;color:rgba(74,52,40,0.55);font-weight:300;}
 
-  .btn{width:100%;margin-top:16px;background:linear-gradient(90deg,var(--orange),#F5916A);border:none;border-radius:10px;padding:12px;color:#1A1008;font-weight:600;font-size:13px;cursor:pointer;letter-spacing:.5px;}
+  .btn{width:100%;margin-top:16px;background:var(--orange);border:none;border-radius:10px;padding:14px;color:#fff;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.3px;box-shadow:0 4px 14px rgba(232,134,58,0.3);}
   .btn:active{opacity:.85;}
   .btn:disabled{opacity:.5;}
   .btn-ghost{background:transparent;border:1px solid rgba(232,98,26,0.4);color:var(--ol);}
@@ -57,7 +57,7 @@
   .log-item{padding:10px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;}
   .log-item:last-child{border-bottom:none;}
   .log-left{color:var(--cream);}
-  .log-sub{font-size:10px;color:rgba(247,237,224,0.4);margin-top:2px;}
+  .log-sub{font-size:10px;color:rgba(74,52,40,0.4);margin-top:2px;}
   .log-right{text-align:right;color:var(--ol);font-weight:500;white-space:nowrap;display:flex;align-items:center;gap:10px;}
   .cat-pill{display:inline-block;font-size:9px;padding:2px 8px;border-radius:999px;background:rgba(232,98,26,0.15);color:var(--ol);margin-right:6px;}
   .log-del{background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:2px 4px;opacity:.7;}
@@ -65,35 +65,35 @@
 
   .hist-toggle{font-size:11px;color:var(--ol);margin-top:8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;user-select:none;}
   .hist-panel{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;max-height:160px;overflow-y:auto;padding:2px;}
-  .hist-chip{font-size:11px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:rgba(247,237,224,0.8);cursor:pointer;line-height:1.4;}
+  .hist-chip{font-size:11px;padding:6px 10px;border-radius:10px;background:rgba(74,52,40,0.05);border:1px solid var(--border);color:rgba(74,52,40,0.8);cursor:pointer;line-height:1.4;}
   .hist-chip:active{background:rgba(232,98,26,0.15);border-color:rgba(232,98,26,0.35);}
   .hist-chip b{color:var(--cream);font-weight:500;}
-  .hist-chip span{display:block;font-size:9px;color:rgba(247,237,224,0.4);}
-  .hist-empty{font-size:11px;color:rgba(247,237,224,0.3);}
+  .hist-chip span{display:block;font-size:9px;color:rgba(74,52,40,0.4);}
+  .hist-empty{font-size:11px;color:rgba(74,52,40,0.3);}
 
   .recipe-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:12px;}
   .recipe-row:last-child{border-bottom:none;}
   .recipe-del{background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:0 6px;}
 
   .cogs-box{background:rgba(232,98,26,0.1);border:1px solid rgba(232,98,26,0.3);border-radius:12px;padding:14px 16px;margin-top:14px;}
-  .cogs-line{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:rgba(247,237,224,0.7);}
+  .cogs-line{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;color:rgba(74,52,40,0.7);}
   .cogs-line.total{font-size:14px;color:var(--cream);font-weight:600;border-top:1px solid rgba(232,98,26,0.25);margin-top:6px;padding-top:8px;}
   .gp-good{color:var(--green);} .gp-bad{color:var(--red);}
 
-  .empty{text-align:center;padding:24px 12px;color:rgba(247,237,224,0.3);font-size:12px;}
-  .loading{text-align:center;padding:20px;color:rgba(247,237,224,0.4);font-size:12px;}
+  .empty{text-align:center;padding:24px 12px;color:rgba(74,52,40,0.3);font-size:12px;}
+  .loading{text-align:center;padding:20px;color:rgba(74,52,40,0.4);font-size:12px;}
 
   .stock-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
   .stock-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
   .stock-name{font-size:14px;font-weight:500;color:var(--cream);}
   .stock-qty{font-size:13px;color:var(--ol);font-weight:600;white-space:nowrap;}
-  .stock-sub{font-size:10px;color:rgba(247,237,224,0.35);margin-top:2px;}
+  .stock-sub{font-size:10px;color:rgba(74,52,40,0.35);margin-top:2px;}
   .stock-uses{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
-  .stock-use{display:flex;justify-content:space-between;font-size:11px;color:rgba(247,237,224,0.6);background:rgba(255,255,255,0.03);border-radius:8px;padding:6px 10px;}
-  .stock-use b{color:rgba(247,237,224,0.85);font-weight:500;}
+  .stock-use{display:flex;justify-content:space-between;font-size:11px;color:rgba(74,52,40,0.6);background:rgba(74,52,40,0.03);border-radius:8px;padding:6px 10px;}
+  .stock-use b{color:rgba(74,52,40,0.85);font-weight:500;}
   .stock-use.low{color:var(--red);background:rgba(220,60,60,0.08);}
   .stock-use.low b{color:var(--red);}
-  .stock-none{font-size:11px;color:rgba(247,237,224,0.3);margin-top:8px;}
+  .stock-none{font-size:11px;color:rgba(74,52,40,0.3);margin-top:8px;}
   .stock-adjust{display:flex;gap:8px;margin-top:12px;align-items:center;}
   .stock-adjust input{flex:1;}
   .stock-adjust button{white-space:nowrap;background:rgba(232,98,26,0.15);border:1px solid rgba(232,98,26,0.35);color:var(--ol);border-radius:8px;padding:9px 12px;font-size:11px;cursor:pointer;font-family:'Mitr',sans-serif;}
@@ -104,33 +104,33 @@
 
   .recipe-table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;}
   .recipe-table{width:100%;border-collapse:collapse;font-size:12px;min-width:880px;}
-  .recipe-table th{text-align:left;padding:8px 10px;color:rgba(247,237,224,0.4);font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
-  .recipe-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;color:rgba(247,237,224,0.85);}
+  .recipe-table th{text-align:left;padding:8px 10px;color:rgba(74,52,40,0.4);font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
+  .recipe-table td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top;color:rgba(74,52,40,0.85);}
   .recipe-table tr:last-child td{border-bottom:none;}
   .recipe-menu-name{font-weight:600;color:var(--cream);white-space:nowrap;}
-  .recipe-price{font-size:10px;color:rgba(247,237,224,0.3);font-weight:400;margin-top:2px;}
+  .recipe-price{font-size:10px;color:rgba(74,52,40,0.3);font-weight:400;margin-top:2px;}
   .recipe-item-line{display:block;margin-bottom:5px;}
   .recipe-item-line:last-child{margin-bottom:0;}
-  .recipe-missing{color:rgba(247,237,224,0.3);font-style:italic;}
-  .recipe-dash{color:rgba(247,237,224,0.25);}
+  .recipe-missing{color:rgba(74,52,40,0.3);font-style:italic;}
+  .recipe-dash{color:rgba(74,52,40,0.25);}
   .recipe-note{display:block;font-size:10px;color:var(--ol);margin-top:2px;line-height:1.4;}
   .recipe-cost{font-weight:600;color:var(--cream);white-space:nowrap;}
   .recipe-profit{font-weight:700;white-space:nowrap;}
   .recipe-profit.good{color:var(--green);}
   .recipe-profit.bad{color:var(--red);}
   .recipe-gp{display:block;font-size:9.5px;opacity:.7;font-weight:400;}
-  .recipe-flat-note{font-size:8.5px;color:rgba(247,237,224,0.35);display:block;margin-top:2px;}
+  .recipe-flat-note{font-size:8.5px;color:rgba(74,52,40,0.35);display:block;margin-top:2px;}
   .recipe-group-row td{background:rgba(232,98,26,0.06);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ol);font-weight:600;padding:8px 10px;border-bottom:1px solid rgba(232,98,26,0.15);}
 
-  .range-chip.selected{border-color:var(--orange);background:rgba(232,98,26,0.15);color:var(--ol);font-weight:600;}
+  .range-chip.selected{border-color:var(--orange);background:var(--orange);color:#fff;font-weight:700;box-shadow:0 2px 6px rgba(232,134,58,0.35);}
   .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  .stat-box{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
-  .stat-label{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:rgba(247,237,224,0.4);margin-bottom:6px;}
-  .stat-val{font-size:18px;font-weight:700;color:var(--cream);}
+  .stat-box{background:#fff;border:1px solid var(--border);border-left:4px solid var(--orange);border-radius:12px;padding:12px 14px;box-shadow:0 2px 6px rgba(0,0,0,0.04);}
+  .stat-label{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:rgba(74,52,40,0.4);margin-bottom:6px;}
+  .stat-val{font-size:19px;font-weight:700;color:var(--orange);}
   .stat-val.good{color:var(--green);} .stat-val.bad{color:var(--red);}
-  .stat-sub{font-size:10.5px;color:rgba(247,237,224,0.4);margin-top:3px;}
+  .stat-sub{font-size:10.5px;color:rgba(74,52,40,0.4);margin-top:3px;}
   .unpaid-note{font-size:11px;color:var(--ol);margin-top:10px;text-align:center;}
-  .carryover-note{font-size:10.5px;color:rgba(247,237,224,0.45);margin-top:10px;text-align:center;font-style:italic;line-height:1.5;}
+  .carryover-note{font-size:10.5px;color:rgba(74,52,40,0.45);margin-top:10px;text-align:center;font-style:italic;line-height:1.5;}
   .freebie-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);}
   .freebie-row:last-child{border-bottom:none;}
   .lowstock-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border);color:var(--red);}
@@ -144,8 +144,8 @@
   .fb-rating.r5,.fb-rating.r4{color:var(--green);}
   .fb-rating.r3{color:var(--ol);}
   .fb-rating.r2,.fb-rating.r1{color:var(--red);}
-  .fb-sub{font-size:10px;color:rgba(247,237,224,0.4);margin-top:2px;}
-  .fb-comment{font-size:12px;color:rgba(247,237,224,0.75);margin-top:6px;line-height:1.5;background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 10px;}
+  .fb-sub{font-size:10px;color:rgba(74,52,40,0.4);margin-top:2px;}
+  .fb-comment{font-size:12px;color:rgba(74,52,40,0.75);margin-top:6px;line-height:1.5;background:rgba(74,52,40,0.03);border-radius:8px;padding:8px 10px;}
 </style>
 </head>
 <body>
@@ -267,7 +267,7 @@
 
   <div class="card">
     <div class="card-title" style="color:var(--ol);">แก้สูตร?</div>
-    <div style="font-size:12px;color:rgba(247,237,224,0.6);line-height:1.7;">
+    <div style="font-size:12px;color:rgba(74,52,40,0.6);line-height:1.7;">
       หน้านี้เป็นหน้าดูอย่างเดียว — บอกในแชทกับ Claude ได้เลยว่าอยากปรับสูตรเมนูไหน ปริมาณเท่าไหร่ จะอัปเดตให้ในระบบทันที ไม่ต้องกรอกฟอร์มเอง
     </div>
   </div>
@@ -573,7 +573,7 @@ async function loadStockTab() {
     if (lowItems.length) {
       html += `<div style="background:rgba(220,60,60,0.1);border:1px solid rgba(220,100,100,0.3);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
         <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px;">🔴 ควรซื้อเพิ่มด่วน — วัตถุดิบเหล่านี้ไม่พอสำหรับ 2 แก้วขึ้นไป</div>
-        ${lowItems.map(i => `<div style="font-size:11px;color:rgba(247,237,224,0.75);padding:2px 0;">${i.name} — ทำได้อีกแค่ <b style="color:var(--red);">${cupsMap[i.id]} แก้ว</b> (เหลือ ${Number(i.stock_quantity).toLocaleString()}${i.base_unit})</div>`).join("")}
+        ${lowItems.map(i => `<div style="font-size:11px;color:rgba(74,52,40,0.75);padding:2px 0;">${i.name} — ทำได้อีกแค่ <b style="color:var(--red);">${cupsMap[i.id]} แก้ว</b> (เหลือ ${Number(i.stock_quantity).toLocaleString()}${i.base_unit})</div>`).join("")}
       </div>`;
     }
     GROUPS.forEach(g => {
