@@ -88,6 +88,7 @@
   .stock-name{font-size:14px;font-weight:500;color:var(--cream);}
   .stock-qty{font-size:13px;color:var(--ol);font-weight:600;white-space:nowrap;}
   .stock-sub{font-size:10px;color:rgba(74,52,40,0.35);margin-top:2px;}
+  .stock-cost-badge{font-size:13px;color:var(--ol);font-weight:600;white-space:nowrap;background:rgba(232,98,26,0.12);border:1px solid rgba(232,98,26,0.25);border-radius:8px;padding:3px 8px;}
   .stock-uses{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
   .stock-use{display:flex;justify-content:space-between;font-size:11px;color:rgba(74,52,40,0.6);background:rgba(74,52,40,0.03);border-radius:8px;padding:6px 10px;}
   .stock-use b{color:rgba(74,52,40,0.85);font-weight:500;}
@@ -586,17 +587,18 @@ async function loadStockTab() {
         const lowWarning = cups !== null && cups < 2
           ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
           : "";
-        const cost20 = (i.base_unit === "g" && i.cost_per_base_unit)
-          ? ` · ฿${(Number(i.cost_per_base_unit) * 20).toFixed(2)}/20g`
+        const cost20Badge = (i.base_unit === "g" && i.cost_per_base_unit)
+          ? `<div class="stock-cost-badge">฿${(Number(i.cost_per_base_unit) * 20).toFixed(2)}/20g</div>`
           : "";
         return `
         <div class="stock-card" data-ing-id="${i.id}">
           <div class="stock-head">
             <div>
               <div class="stock-name">${i.name}</div>
-              <div class="stock-sub">${CAT_LABEL[i.category] || i.category}${i.supplier ? " · " + i.supplier : ""}${cost20}</div>
+              <div class="stock-sub">${CAT_LABEL[i.category] || i.category}${i.supplier ? " · " + i.supplier : ""}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
+              ${cost20Badge}
               <div class="stock-qty">${Number(i.stock_quantity).toLocaleString()} ${i.base_unit}</div>
               <button class="stock-dismiss" data-id="${i.id}" data-name="${i.name.replace(/"/g,'&quot;')}" title="ซ่อนออกจากลิสต์">✕</button>
             </div>
