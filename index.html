@@ -563,7 +563,8 @@ async function loadStockTab() {
     const lowItems = ings.filter(i => cupsMap[i.id] !== null && cupsMap[i.id] < 2);
 
     const GROUPS = [
-      { title: "เบส", match: c => c === "coffee_bean" || c === "base" },
+      { title: "เมล็ดกาแฟ", match: c => c === "coffee_bean" },
+      { title: "เบส (มัทฉะ/ชาไทย/โกโก้)", match: c => c === "base" },
       { title: "มิกเซอร์", match: c => c === "milk" || c === "other" },
       { title: "ปรุงแต่ง", match: c => c === "syrup" },
       { title: "อื่นๆ", match: c => !["coffee_bean", "base", "milk", "other", "syrup"].includes(c) },
@@ -585,12 +586,15 @@ async function loadStockTab() {
         const lowWarning = cups !== null && cups < 2
           ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
           : "";
+        const cost20 = (i.base_unit === "g" && i.cost_per_base_unit)
+          ? ` · ฿${(Number(i.cost_per_base_unit) * 20).toFixed(2)}/20g`
+          : "";
         return `
         <div class="stock-card" data-ing-id="${i.id}">
           <div class="stock-head">
             <div>
               <div class="stock-name">${i.name}</div>
-              <div class="stock-sub">${CAT_LABEL[i.category] || i.category}${i.supplier ? " · " + i.supplier : ""}</div>
+              <div class="stock-sub">${CAT_LABEL[i.category] || i.category}${i.supplier ? " · " + i.supplier : ""}${cost20}</div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <div class="stock-qty">${Number(i.stock_quantity).toLocaleString()} ${i.base_unit}</div>
