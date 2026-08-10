@@ -588,7 +588,7 @@ async function loadStockTab() {
           ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
           : "";
         const cost20Badge = (i.base_unit === "g" && i.cost_per_base_unit)
-          ? `<div class="stock-cost-badge">฿${(Number(i.cost_per_base_unit) * 20).toFixed(2)}/20g</div>`
+          ? `<div class="stock-cost-badge">฿${Math.round(Number(i.cost_per_base_unit) * 20)}</div>`
           : "";
         return `
         <div class="stock-card" data-ing-id="${i.id}">
