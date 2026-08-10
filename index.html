@@ -89,6 +89,9 @@
   .stock-qty{font-size:13px;color:var(--ol);font-weight:600;white-space:nowrap;}
   .stock-sub{font-size:10px;color:rgba(74,52,40,0.35);margin-top:2px;}
   .stock-cost-badge{font-size:13px;color:var(--ol);font-weight:600;white-space:nowrap;background:rgba(232,98,26,0.12);border:1px solid rgba(232,98,26,0.25);border-radius:8px;padding:3px 8px;}
+  .stock-cost-badge.cost-high{color:var(--red);background:rgba(220,60,60,0.12);border-color:rgba(220,100,100,0.3);}
+  .stock-cost-badge.cost-mid{color:#B8860B;background:rgba(230,180,50,0.15);border-color:rgba(230,180,50,0.35);}
+  .stock-cost-badge.cost-low{color:var(--green);background:rgba(74,155,92,0.12);border-color:rgba(74,155,92,0.3);}
   .stock-uses{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
   .stock-use{display:flex;justify-content:space-between;font-size:11px;color:rgba(74,52,40,0.6);background:rgba(74,52,40,0.03);border-radius:8px;padding:6px 10px;}
   .stock-use b{color:rgba(74,52,40,0.85);font-weight:500;}
@@ -587,9 +590,17 @@ async function loadStockTab() {
         const lowWarning = cups !== null && cups < 2
           ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
           : "";
-        const cost20Badge = (i.base_unit === "g" && i.cost_per_base_unit)
-          ? `<div class="stock-cost-badge">฿${Math.round(Number(i.cost_per_base_unit) * 20)}</div>`
-          : "";
+        let cost20Badge = "";
+        if (i.base_unit === "g" && i.cost_per_base_unit) {
+          const c20 = Number(i.cost_per_base_unit) * 20;
+          let tier = "";
+          if (i.category === "coffee_bean") {
+            if (c20 >= 23) tier = " cost-high";
+            else if (c20 <= 17) tier = " cost-low";
+            else tier = " cost-mid";
+          }
+          cost20Badge = `<div class="stock-cost-badge${tier}">฿${Math.round(c20)}</div>`;
+        }
         return `
         <div class="stock-card" data-ing-id="${i.id}">
           <div class="stock-head">
