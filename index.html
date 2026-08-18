@@ -190,13 +190,12 @@
 
 <div class="header">
   <div class="htag">🐱 กาแฟแมวส้ม</div>
-  <h1>จัดซื้อ & สูตรชง</h1>
+  <h1>จัดซื้อ & สต็อก</h1>
 </div>
 
 <div class="tabs">
   <div class="tab active" data-tab="purchase">จัดซื้อ</div>
   <div class="tab" data-tab="stock">สต็อก</div>
-  <div class="tab" data-tab="recipe">สูตรชง</div>
 </div>
 
 <!-- ============ TAB 1: PURCHASING ============ -->
@@ -282,32 +281,6 @@
   <div class="card">
     <div class="card-title">สต็อกคงเหลือ</div>
     <div id="s-list"><div class="loading">กำลังโหลด...</div></div>
-  </div>
-
-</div>
-
-<!-- ============ TAB 3: RECIPES ============ -->
-<div class="view" id="view-recipe">
-
-  <div class="card">
-    <div class="card-title">สูตรชง — 1 เมนู 1 แถวเสมอ</div>
-    <div class="recipe-table-wrap">
-      <table class="recipe-table">
-        <thead>
-          <tr><th>เมนู</th><th>ราคาขาย</th><th>เบส</th><th>ส่วนผสม</th><th>ปรุงรส</th><th>ต้นทุนรวม</th><th>กำไร</th></tr>
-        </thead>
-        <tbody id="recipe-table-body">
-          <tr><td colspan="7" class="loading">กำลังโหลด...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title" style="color:var(--ol);">แก้สูตร?</div>
-    <div style="font-size:12px;color:rgba(74,52,40,0.6);line-height:1.7;">
-      หน้านี้เป็นหน้าดูอย่างเดียว — บอกในแชทกับ Claude ได้เลยว่าอยากปรับสูตรเมนูไหน ปริมาณเท่าไหร่ จะอัปเดตให้ในระบบทันที ไม่ต้องกรอกฟอร์มเอง
-    </div>
   </div>
 
 </div>
@@ -699,90 +672,8 @@ async function loadStockTab() {
   }
 }
 
-// ---------- RECIPE TAB (read-only) ----------
-const BEAN_DOSE_DISPLAY = 20;
-const FLAT_COFFEE_COST = 20;
-let recipeTableLoaded = false;
-
-const DRINK_GROUPS = [
-  { title: "☕ กาแฟ", match: c => ["espresso","dirty","signature"].includes(c) },
-  { title: "🍵 มัทฉะ", match: c => c === "matcha" },
-  { title: "🧋 ชาไทย", match: c => c === "thai_tea" },
-  { title: "🍫 โกโก้", match: c => c === "cocoa" },
-  { title: "🥤 อื่นๆ", match: c => !["espresso","dirty","signature","matcha","thai_tea","cocoa"].includes(c) },
-];
-
-function renderRecipeLines(rows, emptyClass) {
-  if (!rows.length) return `<span class="${emptyClass}">${emptyClass === 'recipe-dash' ? '—' : 'ยังไม่ได้กรอก'}</span>`;
-  return rows.map(r => `
-    <span class="recipe-item-line">${r.ingredients.name} ${r.quantity}${r.ingredients.base_unit}${r.notes ? `<span class="recipe-note">📝 ${r.notes}</span>` : ""}</span>
-  `).join("");
-}
-
-function renderMenuRow(m, byMenu) {
-  const rows = byMenu[m.id] || [];
-  const baseRows = rows.filter(r => r.ingredients.category === "base");
-  const mixerRows = rows.filter(r => ["milk", "other"].includes(r.ingredients.category));
-  const flavorRows = rows.filter(r => r.ingredients.category === "syrup");
-  const hasNoRecipeAtAll = rows.length === 0 && !m.needs_bean;
-
-  const baseHtml = m.needs_bean
-    ? `<span class="recipe-item-line">กาแฟ ${BEAN_DOSE_DISPLAY}g <span style="opacity:.5;">(เลือกเมล็ดตอนชง)</span></span>`
-    : renderRecipeLines(baseRows, "recipe-missing");
-
-  const ingredientCost = rows.reduce((sum, r) => sum + (r.quantity * (r.ingredients.cost_per_base_unit || 0)), 0);
-  const totalCost = ingredientCost + (m.needs_bean ? FLAT_COFFEE_COST : 0);
-  const profit = Number(m.price) - totalCost;
-  const gp = Number(m.price) ? (profit / Number(m.price) * 100) : 0;
-
-  const costHtml = hasNoRecipeAtAll
-    ? `<span class="recipe-missing">รอสูตร</span>`
-    : `<span class="recipe-cost">฿${totalCost.toFixed(2)}</span>${m.needs_bean ? '<span class="recipe-flat-note">รวมกาแฟ flat 20฿</span>' : ''}`;
-  const profitHtml = hasNoRecipeAtAll
-    ? `<span class="recipe-missing">—</span>`
-    : `<span class="recipe-profit ${profit >= 0 ? 'good' : 'bad'}">฿${profit.toFixed(2)}<span class="recipe-gp">${gp.toFixed(0)}%</span></span>`;
-
-  return `
-    <tr>
-      <td><div class="recipe-menu-name">${m.name}</div></td>
-      <td><span class="recipe-cost">฿${m.price}</span></td>
-      <td>${baseHtml}</td>
-      <td>${renderRecipeLines(mixerRows, "recipe-missing")}</td>
-      <td>${renderRecipeLines(flavorRows, "recipe-dash")}</td>
-      <td>${costHtml}</td>
-      <td>${profitHtml}</td>
-    </tr>
-  `;
-}
-
-async function loadRecipeTable() {
-  const body = document.getElementById("recipe-table-body");
-  body.innerHTML = '<tr><td colspan="7" class="loading">กำลังโหลด...</td></tr>';
-  try {
-    const [menuItems, recipes] = await Promise.all([
-      sb("menu_items?select=*&order=name"),
-      sb("menu_recipes?select=*,ingredients(name,category,base_unit,cost_per_base_unit)")
-    ]);
-
-    const byMenu = {};
-    recipes.forEach(r => {
-      if (!byMenu[r.menu_item_id]) byMenu[r.menu_item_id] = [];
-      byMenu[r.menu_item_id].push(r);
-    });
-
-    let html = "";
-    DRINK_GROUPS.forEach(g => {
-      const items = menuItems.filter(m => g.match(m.category));
-      if (!items.length) return;
-      html += `<tr class="recipe-group-row"><td colspan="7">${g.title}</td></tr>`;
-      html += items.map(m => renderMenuRow(m, byMenu)).join("");
-    });
-    body.innerHTML = html;
-  } catch (e) {
-    body.innerHTML = '<tr><td colspan="7" class="empty">โหลดไม่สำเร็จ: ' + e.message + '</td></tr>';
-  }
-}
-loadRecipeTable();
+// ---------- (สูตรชง — ย้ายไปแท็บ "เมนู" ใน orangecat-brew แล้ว เป็น single source of truth ที่เดียว
+// ทั้งแก้สูตรและดูต้นทุน/กำไร ไม่ต้องมีหน้ารายงานแยกที่นี่อีกต่อไป) ----------
 
 </script>
 
