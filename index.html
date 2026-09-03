@@ -205,25 +205,36 @@
   <div class="card">
     <div class="card-title">บันทึกการซื้อของเข้าร้าน</div>
 
-    <label>ชื่อสินค้า</label>
-    <select id="p-name-select">
-      <option value="">กำลังโหลดรายชื่อวัตถุดิบ...</option>
-    </select>
-    <div class="field-hint" id="p-name-hint" style="display:none;"></div>
-    <input id="p-name" type="text" placeholder="พิมพ์ชื่อวัตถุดิบใหม่..." style="display:none;margin-top:8px;">
-    <div class="hist-toggle" id="p-hist-toggle">ประวัติที่เคยกรอก ▾</div>
-    <div class="hist-panel" id="p-hist-panel" style="display:none;"><div class="hist-empty">กำลังโหลด...</div></div>
+    <label>วันที่ซื้อ</label>
+    <input id="p-date" type="date">
 
     <label>หมวดหมู่</label>
     <select id="p-category">
-      <option value="coffee_bean">เมล็ดกาแฟ</option>
-      <option value="milk">นม/ครีม</option>
-      <option value="syrup">ไซรัป/ผง</option>
-      <option value="base">เบส (มัทฉะ/ชาไทย/โกโก้)</option>
-      <option value="packaging">แพ็กเกจจิ้ง</option>
-      <option value="equipment">อุปกรณ์</option>
-      <option value="other">อื่นๆ</option>
+      <optgroup label="วัตถุดิบ (กระทบต้นทุนต่อแก้ว)">
+        <option value="coffee_bean">Coffee Beans</option>
+        <option value="milk">Milk/Cream</option>
+        <option value="syrup">Syrup/Powder</option>
+        <option value="base">Base (Matcha/Thai Tea/Cocoa)</option>
+        <option value="packaging">Packaging</option>
+        <option value="other">Other (ingredient)</option>
+      </optgroup>
+      <optgroup label="ของใหญ่/คงที่ (ไม่กระทบต้นทุนต่อแก้ว)">
+        <option value="equipment">Equipment</option>
+        <option value="new_menu_trial">New Menu Trial</option>
+        <option value="marketing_subscription">Marketing & Subscriptions</option>
+        <option value="renovation">Renovation</option>
+        <option value="other_fixed">Other</option>
+      </optgroup>
     </select>
+
+    <label>ชื่อสินค้า</label>
+    <select id="p-name-select">
+      <option value="">เลือกหมวดหมู่ก่อนนะ</option>
+    </select>
+    <div class="field-hint" id="p-name-hint" style="display:none;"></div>
+    <input id="p-name" type="text" placeholder="พิมพ์ชื่อรายการใหม่..." style="display:none;margin-top:8px;">
+    <div class="hist-toggle" id="p-hist-toggle">ประวัติที่เคยกรอก ▾</div>
+    <div class="hist-panel" id="p-hist-panel" style="display:none;"><div class="hist-empty">กำลังโหลด...</div></div>
 
     <div class="row2" id="p-qtyunit-row">
       <div>
@@ -246,16 +257,9 @@
     <label>ราคารวมที่จ่าย (บาท)</label>
     <input id="p-cost" type="number" step="any" placeholder="143">
 
-    <div class="row2">
-      <div>
-        <label>ซัพพลายเออร์ / จ่ายให้ใคร</label>
-        <input id="p-supplier" type="text" placeholder="เช่น StayHere Coffee">
-      </div>
-      <div>
-        <label>วันที่ซื้อ</label>
-        <input id="p-date" type="date">
-      </div>
-    </div>
+    <label>ซัพพลายเออร์ / จ่ายให้ใคร</label>
+    <div id="p-supplier-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+    <input id="p-supplier" type="text" placeholder="เช่น StayHere Coffee — หรือแตะจากลิสต์ด้านบน">
 
     <label>หมายเหตุ</label>
     <input id="p-notes" type="text" placeholder="ไม่บังคับ">
@@ -263,6 +267,10 @@
     <div class="checkrow" id="p-updatecost-row">
       <input type="checkbox" id="p-updatecost" checked>
       <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ปิดถ้าเป็นการซื้ออุปกรณ์</span>
+    </div>
+    <div class="checkrow" id="p-includefin-row" style="display:none;">
+      <input type="checkbox" id="p-includefin" checked>
+      <span>รวมในงบการเงิน (ยกเลิกติ๊กถ้าไม่อยากให้กระทบภาพรวม เช่น รีโนเวทก้อนใหญ่)</span>
     </div>
 
     <button class="btn" id="p-submit">บันทึกการซื้อ</button>
@@ -336,7 +344,13 @@ async function sb(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-const CAT_LABEL = {coffee_bean:"เมล็ดกาแฟ", milk:"นม/ครีม", syrup:"ไซรัป/ผง", packaging:"แพ็กเกจจิ้ง", equipment:"อุปกรณ์", base:"เบส (มัทฉะ/ชาไทย/โกโก้)", other:"อื่นๆ"};
+const CAT_LABEL = {
+  coffee_bean:"Coffee Beans", milk:"Milk/Cream", syrup:"Syrup/Powder", base:"Base (Matcha/Thai Tea/Cocoa)", packaging:"Packaging", other:"Other (ingredient)",
+  equipment:"Equipment", new_menu_trial:"New Menu Trial", marketing_subscription:"Marketing & Subscriptions", renovation:"Renovation", other_fixed:"Other"
+};
+const FIXED_CATEGORIES = ["equipment", "new_menu_trial", "marketing_subscription", "renovation", "other_fixed"];
+// หมวดของใหญ่/คงที่ที่ไม่มีหน่วยนับตามธรรมชาติ — ซ่อนช่องจำนวน/หน่วย (Equipment ยกเว้น เพราะนับเป็นชิ้น/ชุดได้)
+const HIDE_QTY_UNIT_CATEGORIES = ["new_menu_trial", "marketing_subscription", "renovation", "other_fixed"];
 
 // วัตถุดิบ 1 ตัวมักถูกใช้ในหลายเมนู/หลายปริมาณต่อแก้ว — ใช้เมนูที่ใช้เยอะที่สุด (worst case) เพื่อประเมินแบบระวังไว้ก่อน
 async function computeCupsRemainingMap(ingredients) {
@@ -413,28 +427,28 @@ async function loadPurchaseLog() {
 }
 loadPurchaseLog();
 
-// ---------- INGREDIENT DROPDOWN (กันชื่อซ้ำ — เลือกจากของที่มีอยู่แล้วเสมอ) ----------
-const CAT_ORDER = ["coffee_bean","base","milk","syrup","packaging","equipment","other"];
-async function loadIngredientDropdown() {
+// ---------- ITEM DROPDOWN — กรองตามหมวดที่เลือกไว้เท่านั้น (cascading) ----------
+// วัตถุดิบ (COGS) ดึงจาก ingredients (ตาราง stock จริง) / ของใหญ่-คงที่ ดึงชื่อที่เคยกรอกจาก purchase_log (ไม่มี stock)
+async function loadNameOptionsForCategory(category) {
   const sel = document.getElementById("p-name-select");
+  sel.innerHTML = '<option value="">กำลังโหลด...</option>';
   try {
-    const rows = await sb("ingredients?select=id,name,category&active=eq.true&order=category,name");
-    const byCat = {};
-    rows.forEach(r => { (byCat[r.category] = byCat[r.category] || []).push(r); });
-    let html = '<option value="">— เลือกวัตถุดิบ —</option>';
-    html += '<option value="__new__">➕ วัตถุดิบใหม่ที่ยังไม่มีในระบบ</option>';
-    CAT_ORDER.forEach(cat => {
-      if (!byCat[cat]) return;
-      html += `<optgroup label="${CAT_LABEL[cat] || cat}">`;
-      html += byCat[cat].map(r => `<option value="${r.name.replace(/"/g,'&quot;')}">${r.name}</option>`).join("");
-      html += `</optgroup>`;
-    });
+    let items = [];
+    if (FIXED_CATEGORIES.includes(category)) {
+      const rows = await sb(`purchase_log?select=item_name&category=eq.${category}&order=item_name`);
+      items = [...new Set(rows.map(r => r.item_name))].sort();
+    } else {
+      const rows = await sb(`ingredients?select=name&active=eq.true&category=eq.${category}&order=name`);
+      items = rows.map(r => r.name);
+    }
+    let html = `<option value="">— เลือกรายการ —</option>`;
+    html += `<option value="__new__">➕ รายการใหม่ที่ยังไม่มีในระบบ</option>`;
+    html += items.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join("");
     sel.innerHTML = html;
   } catch (e) {
     sel.innerHTML = '<option value="">โหลดไม่สำเร็จ</option>';
   }
 }
-loadIngredientDropdown();
 
 function setNewItemMode(isNew) {
   document.getElementById("p-name").style.display = isNew ? "block" : "none";
@@ -448,12 +462,37 @@ document.getElementById("p-name-select").addEventListener("change", (e) => {
   setNewItemMode(e.target.value === "__new__");
 });
 
-// อุปกรณ์ ไม่ผูกกับ ingredients (ไม่มีสูตรใช้อุปกรณ์เป็นวัตถุดิบ) — ซ่อน checkbox อัปเดตต้นทุนอ้างอิง
+// ซัพพลายเออร์ที่เคยใช้ — โชว์เป็นชิปให้แตะเลือก ไม่ต้องพิมพ์ซ้ำทุกครั้ง
+async function loadSupplierChips() {
+  const el = document.getElementById("p-supplier-chips");
+  try {
+    const rows = await sb("purchase_log?select=supplier&supplier=not.is.null&order=created_at.desc&limit=200");
+    const counts = {};
+    rows.forEach(r => { if (r.supplier) counts[r.supplier] = (counts[r.supplier] || 0) + 1; });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name]) => name);
+    el.innerHTML = top.map(name => `<button type="button" class="supplier-chip" data-name="${name.replace(/"/g,'&quot;')}" style="padding:6px 12px;border-radius:999px;border:1.5px solid #E4DCC8;background:#fff;color:#8a6a4a;font-size:11.5px;font-family:inherit;">${name}</button>`).join("");
+    el.querySelectorAll(".supplier-chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        document.getElementById("p-supplier").value = chip.dataset.name;
+        el.querySelectorAll(".supplier-chip").forEach(c => { c.style.borderColor = "#E4DCC8"; c.style.background = "#fff"; c.style.color = "#8a6a4a"; });
+        chip.style.borderColor = "#E8863A"; chip.style.background = "#FFF3E8"; chip.style.color = "#E8863A";
+      });
+    });
+  } catch (e) { /* เงียบไว้ ไม่บล็อกการกรอกฟอร์ม */ }
+}
+loadSupplierChips();
+
+// เปลี่ยนหมวดหมู่ → โหลดรายการที่กรองแล้วใหม่ + ปรับ field ที่เกี่ยวข้องตามประเภทหมวด
 function applyCategoryMode() {
   const category = document.getElementById("p-category").value;
-  document.getElementById("p-updatecost-row").style.display = (category === "equipment") ? "none" : "flex";
+  const isFixed = FIXED_CATEGORIES.includes(category);
+  document.getElementById("p-qtyunit-row").style.display = HIDE_QTY_UNIT_CATEGORIES.includes(category) ? "none" : "flex";
+  document.getElementById("p-updatecost-row").style.display = isFixed ? "none" : "flex";
+  document.getElementById("p-includefin-row").style.display = isFixed ? "flex" : "none";
+  return loadNameOptionsForCategory(category);
 }
 document.getElementById("p-category").addEventListener("change", applyCategoryMode);
+applyCategoryMode();
 applyCategoryMode();
 
 // ---------- HISTORY TOGGLE ----------
@@ -480,7 +519,9 @@ async function loadHistory() {
       </div>
     `).join("");
     panel.querySelectorAll(".hist-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
+      chip.addEventListener("click", async () => {
+        document.getElementById("p-category").value = chip.dataset.category;
+        await applyCategoryMode();
         const sel = document.getElementById("p-name-select");
         const matchOpt = Array.from(sel.options).find(o => o.value === chip.dataset.name);
         if (matchOpt) {
@@ -491,7 +532,6 @@ async function loadHistory() {
           setNewItemMode(true);
           document.getElementById("p-name").value = chip.dataset.name;
         }
-        document.getElementById("p-category").value = chip.dataset.category;
         document.getElementById("p-qty").value = chip.dataset.qty;
         document.getElementById("p-unit").value = chip.dataset.unit;
         document.getElementById("p-supplier").value = chip.dataset.supplier;
@@ -524,15 +564,18 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     ? document.getElementById("p-name").value.trim()
     : selVal;
   const category = document.getElementById("p-category").value;
-  const qty = parseFloat(document.getElementById("p-qty").value);
-  const unit = document.getElementById("p-unit").value;
+  const isFixed = FIXED_CATEGORIES.includes(category);
+  const noUnit = HIDE_QTY_UNIT_CATEGORIES.includes(category);
+  const qty = noUnit ? 1 : parseFloat(document.getElementById("p-qty").value);
+  const unit = noUnit ? "ครั้ง" : document.getElementById("p-unit").value;
   const cost = parseFloat(document.getElementById("p-cost").value);
   const supplier = document.getElementById("p-supplier").value.trim() || null;
   const date = document.getElementById("p-date").value;
   const notes = document.getElementById("p-notes").value.trim() || null;
   const updateCost = document.getElementById("p-updatecost").checked;
+  const includeInFinancials = document.getElementById("p-includefin").checked;
 
-  if (!name || !cost || !qty || !unit) {
+  if (!name || !cost || (!noUnit && (!qty || !unit))) {
     status.textContent = "กรอกชื่อสินค้า จำนวน และราคาให้ครบก่อนนะ";
     status.className = "status err"; return;
   }
@@ -541,7 +584,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
   try {
     let ingredientId = null;
 
-    if (updateCost && category !== "equipment") {
+    if (updateCost && !isFixed) {
       const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity`);
       if (existing && existing.length) {
         ingredientId = existing[0].id;
@@ -569,7 +612,9 @@ document.getElementById("p-submit").addEventListener("click", async () => {
       method: "POST",
       body: JSON.stringify([{
         item_name: name, category, quantity: qty, unit, total_cost: cost,
-        supplier, purchase_date: date, notes, ingredient_id: ingredientId
+        supplier, purchase_date: date, notes, ingredient_id: ingredientId,
+        cost_type: isFixed ? "fixed" : "variable",
+        include_in_financials: isFixed ? includeInFinancials : true
       }])
     });
 
@@ -582,10 +627,10 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     document.getElementById("p-cost").value = "";
     document.getElementById("p-supplier").value = "";
     document.getElementById("p-notes").value = "";
-    document.getElementById("p-category").value = "coffee_bean";
+    document.getElementById("p-includefin").checked = true;
     applyCategoryMode();
     loadPurchaseLog();
-    loadIngredientDropdown();
+    loadSupplierChips();
     historyLoaded = false;
     stockLoaded = false;
   } catch (e) {
