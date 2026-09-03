@@ -221,10 +221,18 @@
       <option value="base">เบส (มัทฉะ/ชาไทย/โกโก้)</option>
       <option value="packaging">แพ็กเกจจิ้ง</option>
       <option value="equipment">อุปกรณ์</option>
+      <optgroup label="รายจ่ายร้าน (ไม่ใช่วัตถุดิบ)">
+        <option value="rent">ค่าเช่า</option>
+        <option value="utilities">ค่าน้ำ-ไฟ-เน็ต</option>
+        <option value="marketing">การตลาด-โฆษณา</option>
+        <option value="labor">ค่าแรง</option>
+        <option value="renovation">รีโนเวท</option>
+        <option value="subscription">ซอฟต์แวร์-สมัครสมาชิก</option>
+      </optgroup>
       <option value="other">อื่นๆ</option>
     </select>
 
-    <div class="row2">
+    <div class="row2" id="p-qtyunit-row">
       <div>
         <label>จำนวนที่ซื้อ</label>
         <input id="p-qty" type="number" step="any" placeholder="200">
@@ -247,7 +255,7 @@
 
     <div class="row2">
       <div>
-        <label>ซัพพลายเออร์</label>
+        <label>ซัพพลายเออร์ / จ่ายให้ใคร</label>
         <input id="p-supplier" type="text" placeholder="เช่น StayHere Coffee">
       </div>
       <div>
@@ -259,7 +267,7 @@
     <label>หมายเหตุ</label>
     <input id="p-notes" type="text" placeholder="ไม่บังคับ">
 
-    <div class="checkrow">
+    <div class="checkrow" id="p-updatecost-row">
       <input type="checkbox" id="p-updatecost" checked>
       <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ปิดถ้าเป็นการซื้ออุปกรณ์</span>
     </div>
@@ -309,7 +317,10 @@ async function sb(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-const CAT_LABEL = {coffee_bean:"เมล็ดกาแฟ", milk:"นม/ครีม", syrup:"ไซรัป/ผง", packaging:"แพ็กเกจจิ้ง", equipment:"อุปกรณ์", base:"เบส (มัทฉะ/ชาไทย/โกโก้)", other:"อื่นๆ"};
+const CAT_LABEL = {coffee_bean:"เมล็ดกาแฟ", milk:"นม/ครีม", syrup:"ไซรัป/ผง", packaging:"แพ็กเกจจิ้ง", equipment:"อุปกรณ์", base:"เบส (มัทฉะ/ชาไทย/โกโก้)", rent:"ค่าเช่า", utilities:"ค่าน้ำ-ไฟ-เน็ต", marketing:"การตลาด-โฆษณา", labor:"ค่าแรง", renovation:"รีโนเวท", subscription:"ซอฟต์แวร์-สมัครสมาชิก", other:"อื่นๆ"};
+
+// หมวดที่ไม่มี "หน่วยนับ" ตามธรรมชาติ (ค่าเช่า/ค่าน้ำไฟ ฯลฯ) — ไม่บังคับกรอกจำนวน/หน่วย ไม่ผูกกับ ingredients
+const PURE_EXPENSE_CATEGORIES = ["rent", "utilities", "marketing", "labor", "renovation", "subscription"];
 
 // วัตถุดิบ 1 ตัวมักถูกใช้ในหลายเมนู/หลายปริมาณต่อแก้ว — ใช้เมนูที่ใช้เยอะที่สุด (worst case) เพื่อประเมินแบบระวังไว้ก่อน
 async function computeCupsRemainingMap(ingredients) {
@@ -419,6 +430,17 @@ document.getElementById("p-name-select").addEventListener("change", (e) => {
   setNewItemMode(e.target.value === "__new__");
 });
 
+// รายจ่ายที่ไม่ใช่วัตถุดิบ (ค่าเช่า/ค่าน้ำไฟ ฯลฯ) ไม่มีหน่วยนับตามธรรมชาติ — ซ่อนช่องจำนวน/หน่วย
+// และไม่ผูกกับ ingredients เลย (ตั้ง qty=1 unit="ครั้ง" ให้อัตโนมัติตอนบันทึก)
+function applyCategoryMode() {
+  const category = document.getElementById("p-category").value;
+  const isPureExpense = PURE_EXPENSE_CATEGORIES.includes(category);
+  document.getElementById("p-qtyunit-row").style.display = isPureExpense ? "none" : "flex";
+  document.getElementById("p-updatecost-row").style.display = (isPureExpense || category === "equipment") ? "none" : "flex";
+}
+document.getElementById("p-category").addEventListener("change", applyCategoryMode);
+applyCategoryMode();
+
 // ---------- HISTORY TOGGLE ----------
 let historyLoaded = false;
 async function loadHistory() {
@@ -487,16 +509,19 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     ? document.getElementById("p-name").value.trim()
     : selVal;
   const category = document.getElementById("p-category").value;
-  const qty = parseFloat(document.getElementById("p-qty").value);
-  const unit = document.getElementById("p-unit").value;
+  const isPureExpense = PURE_EXPENSE_CATEGORIES.includes(category);
+  const qty = isPureExpense ? 1 : parseFloat(document.getElementById("p-qty").value);
+  const unit = isPureExpense ? "ครั้ง" : document.getElementById("p-unit").value;
   const cost = parseFloat(document.getElementById("p-cost").value);
   const supplier = document.getElementById("p-supplier").value.trim() || null;
   const date = document.getElementById("p-date").value;
   const notes = document.getElementById("p-notes").value.trim() || null;
   const updateCost = document.getElementById("p-updatecost").checked;
 
-  if (!name || !qty || !cost || !unit) {
-    status.textContent = "กรอกชื่อสินค้า จำนวน และราคาให้ครบก่อนนะ";
+  if (!name || !cost || (!isPureExpense && (!qty || !unit))) {
+    status.textContent = isPureExpense
+      ? "กรอกรายการและจำนวนเงินให้ครบก่อนนะ"
+      : "กรอกชื่อสินค้า จำนวน และราคาให้ครบก่อนนะ";
     status.className = "status err"; return;
   }
 
@@ -504,7 +529,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
   try {
     let ingredientId = null;
 
-    if (updateCost && category !== "equipment") {
+    if (updateCost && category !== "equipment" && !isPureExpense) {
       const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity`);
       if (existing && existing.length) {
         ingredientId = existing[0].id;
