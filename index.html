@@ -233,6 +233,13 @@
       <option value="other">อื่นๆ</option>
     </select>
 
+    <label>ประเภทต้นทุน</label>
+    <div class="row2" id="p-costtype-row" style="gap:8px;">
+      <button type="button" class="cost-type-btn active" data-val="variable" style="flex:1;padding:11px 8px;border-radius:10px;border:2px solid #E8863A;background:#FFF3E8;color:#E8863A;font-size:12.5px;font-weight:700;font-family:inherit;">💧 แปรผัน (กระทบต้นทุน/แก้ว)</button>
+      <button type="button" class="cost-type-btn" data-val="fixed" style="flex:1;padding:11px 8px;border-radius:10px;border:2px solid #E4DCC8;background:#fff;color:#A8876F;font-size:12.5px;font-weight:700;font-family:inherit;">📌 คงที่ (แค่ track ยอดจ่าย)</button>
+    </div>
+    <div class="field-hint">แปรผัน = วัตถุดิบที่กระทบต้นทุนต่อแก้วจริง (เมล็ด/นม/ไซรัป ฯลฯ) · คงที่ = อุปกรณ์/ค่าเช่า/ค่าแรง ไม่กระทบต้นทุนต่อแก้ว แค่ดูยอดรวมที่จ่ายไป — ระบบเดาให้ตามหมวดหมู่ แก้เองได้ถ้าไม่ตรง</div>
+
     <div class="row2" id="p-qtyunit-row">
       <div>
         <label>จำนวนที่ซื้อ</label>
@@ -389,7 +396,9 @@ async function loadPurchaseLog() {
     el.innerHTML = rows.map(r => `
       <div class="log-item">
         <div class="log-left">
-          <span class="cat-pill">${CAT_LABEL[r.category] || r.category}</span>${r.item_name}
+          <span class="cat-pill">${CAT_LABEL[r.category] || r.category}</span>
+          <span style="font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px;margin-left:4px;${r.cost_type === 'fixed' ? 'background:rgba(168,135,111,0.12);color:#A8876F;' : 'background:rgba(232,134,58,0.12);color:#E8863A;'}">${r.cost_type === 'fixed' ? '📌 คงที่' : '💧 แปรผัน'}</span>
+          ${r.item_name}
           <div class="log-sub">${r.purchase_date} ${r.supplier ? "· " + r.supplier : ""}</div>
         </div>
         <div class="log-right">
@@ -454,11 +463,25 @@ document.getElementById("p-name-select").addEventListener("change", (e) => {
 
 // รายจ่ายที่ไม่ใช่วัตถุดิบ (ค่าเช่า/ค่าน้ำไฟ ฯลฯ) ไม่มีหน่วยนับตามธรรมชาติ — ซ่อนช่องจำนวน/หน่วย
 // และไม่ผูกกับ ingredients เลย (ตั้ง qty=1 unit="ครั้ง" ให้อัตโนมัติตอนบันทึก)
+const FIXED_COST_CATEGORIES = ["equipment", "rent", "utilities", "marketing", "labor", "renovation", "subscription"];
+function setCostType(val) {
+  document.querySelectorAll(".cost-type-btn").forEach(btn => {
+    const active = btn.dataset.val === val;
+    btn.classList.toggle("active", active);
+    btn.style.borderColor = active ? "#E8863A" : "#E4DCC8";
+    btn.style.background = active ? "#FFF3E8" : "#fff";
+    btn.style.color = active ? "#E8863A" : "#A8876F";
+  });
+}
+document.querySelectorAll(".cost-type-btn").forEach(btn => {
+  btn.addEventListener("click", () => setCostType(btn.dataset.val));
+});
 function applyCategoryMode() {
   const category = document.getElementById("p-category").value;
   const isPureExpense = PURE_EXPENSE_CATEGORIES.includes(category);
   document.getElementById("p-qtyunit-row").style.display = isPureExpense ? "none" : "flex";
   document.getElementById("p-updatecost-row").style.display = (isPureExpense || category === "equipment") ? "none" : "flex";
+  setCostType(FIXED_COST_CATEGORIES.includes(category) ? "fixed" : "variable");
 }
 document.getElementById("p-category").addEventListener("change", applyCategoryMode);
 applyCategoryMode();
@@ -539,6 +562,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
   const date = document.getElementById("p-date").value;
   const notes = document.getElementById("p-notes").value.trim() || null;
   const updateCost = document.getElementById("p-updatecost").checked;
+  const costType = document.querySelector(".cost-type-btn.active").dataset.val;
 
   if (!name || !cost || (!isPureExpense && (!qty || !unit))) {
     status.textContent = isPureExpense
@@ -579,7 +603,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
       method: "POST",
       body: JSON.stringify([{
         item_name: name, category, quantity: qty, unit, total_cost: cost,
-        supplier, purchase_date: date, notes, ingredient_id: ingredientId
+        supplier, purchase_date: date, notes, ingredient_id: ingredientId, cost_type: costType
       }])
     });
 
@@ -592,6 +616,8 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     document.getElementById("p-cost").value = "";
     document.getElementById("p-supplier").value = "";
     document.getElementById("p-notes").value = "";
+    document.getElementById("p-category").value = "coffee_bean";
+    applyCategoryMode();
     loadPurchaseLog();
     loadIngredientDropdown();
     historyLoaded = false;
