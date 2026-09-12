@@ -266,7 +266,7 @@
 
     <div class="checkrow" id="p-updatecost-row">
       <input type="checkbox" id="p-updatecost" checked>
-      <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ปิดถ้าเป็นการซื้ออุปกรณ์</span>
+      <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ไม่ว่าติ๊กหรือไม่ สต็อกจะถูกเพิ่มเข้าเสมอ ปิดถ้าราคาซื้อครั้งนี้ไม่ใช่ราคาปกติ (เช่น ซื้อโปรโมชั่น/ราคาพิเศษ)</span>
     </div>
     <div class="checkrow" id="p-includefin-row" style="display:none;">
       <input type="checkbox" id="p-includefin" checked>
@@ -584,19 +584,23 @@ document.getElementById("p-submit").addEventListener("click", async () => {
   try {
     let ingredientId = null;
 
-    if (updateCost && !isFixed) {
+    if (!isFixed) {
       const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity`);
       if (existing && existing.length) {
         ingredientId = existing[0].id;
+        // สต็อกเพิ่มเข้าเสมอทุกครั้งที่บันทึกซื้อของ — ไม่ผูกกับ checkbox "อัปเดตต้นทุนอ้างอิง" อีกต่อไป
+        // (บั๊กเดิม: ถ้าไม่ติ๊ก สต็อกจะไม่เพิ่มเลย ทั้งที่ของซื้อเข้ามาจริง — ต้นเหตุสต็อกติดลบทั่วร้าน)
         const newStock = Number(existing[0].stock_quantity || 0) + qty;
-        await sb(`ingredients?id=eq.${ingredientId}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            purchase_unit_size: qty, purchase_unit_cost: cost,
-            base_unit: unit, supplier: supplier, stock_quantity: newStock, updated_at: new Date().toISOString()
-          })
-        });
+        const patchBody = { stock_quantity: newStock, updated_at: new Date().toISOString() };
+        if (updateCost) {
+          patchBody.purchase_unit_size = qty;
+          patchBody.purchase_unit_cost = cost;
+          patchBody.base_unit = unit;
+          patchBody.supplier = supplier;
+        }
+        await sb(`ingredients?id=eq.${ingredientId}`, { method: "PATCH", body: JSON.stringify(patchBody) });
       } else {
+        // วัตถุดิบใหม่ที่ไม่เคยมีในระบบ — ต้องตั้งค่าต้นทุนอ้างอิงเริ่มต้นเสมอ (ไม่มีของเดิมให้ "ไม่อัปเดต")
         const created = await sb("ingredients", {
           method: "POST",
           body: JSON.stringify([{
