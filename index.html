@@ -715,6 +715,10 @@ async function loadStockTab() {
             <input type="number" step="any" class="s-adjust-input" placeholder="ปรับยอดสต็อกเป็น...">
             <button class="s-adjust-btn" data-id="${i.id}">บันทึกยอดใหม่</button>
           </div>
+          <div class="stock-adjust" style="margin-top:6px;">
+            <input type="number" step="any" class="s-par-input" placeholder="Par level (เตือนล่วงหน้า)" value="${i.par_level ?? ''}">
+            <button class="s-par-btn" data-id="${i.id}">บันทึก par</button>
+          </div>
         </div>
       `;
       }).join("");
@@ -753,6 +757,27 @@ async function loadStockTab() {
         } catch (e) {
           alert("ปรับยอดไม่สำเร็จ: " + e.message);
           btn.disabled = false; btn.textContent = "บันทึกยอดใหม่";
+        }
+      });
+    });
+    listEl.querySelectorAll(".s-par-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const card = btn.closest(".stock-card");
+        const input = card.querySelector(".s-par-input");
+        const raw = input.value.trim();
+        const val = raw === "" ? null : parseFloat(raw);
+        if (raw !== "" && isNaN(val)) { alert("กรอกตัวเลขก่อนนะ (หรือเว้นว่างไว้ถ้าไม่อยากติดตาม)"); return; }
+        btn.disabled = true; btn.textContent = "กำลังบันทึก...";
+        try {
+          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ par_level: val, updated_at: new Date().toISOString() })
+          });
+          btn.textContent = "✓ บันทึกแล้ว";
+          setTimeout(() => { btn.textContent = "บันทึก par"; btn.disabled = false; }, 1200);
+        } catch (e) {
+          alert("บันทึกไม่สำเร็จ: " + e.message);
+          btn.disabled = false; btn.textContent = "บันทึก par";
         }
       });
     });
