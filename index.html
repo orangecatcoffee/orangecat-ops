@@ -660,7 +660,7 @@ async function loadStockTab() {
     }
 
     const cupsMap = await computeCupsRemainingMap(ings);
-    const lowItems = ings.filter(i => cupsMap[i.id] !== null && cupsMap[i.id] < 2);
+    const lowItems = ings.filter(i => i.must_have !== false && cupsMap[i.id] !== null && cupsMap[i.id] < 2);
 
     const GROUPS = [
       { title: "เมล็ดกาแฟ", match: c => c === "coffee_bean" },
@@ -683,7 +683,8 @@ async function loadStockTab() {
       html += `<div class="stock-group-heading">${g.title}</div>`;
       html += items.map(i => {
         const cups = cupsMap[i.id];
-        const lowWarning = cups !== null && cups < 2
+        const isMustHave = i.must_have !== false;
+        const lowWarning = isMustHave && cups !== null && cups < 2
           ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
           : "";
         let cost20Badge = "";
@@ -711,6 +712,9 @@ async function loadStockTab() {
             </div>
           </div>
           ${lowWarning}
+          <button type="button" class="stock-musthave-toggle" data-id="${i.id}" data-must-have="${isMustHave}" style="width:100%;margin-top:6px;padding:7px;border-radius:8px;border:1.5px solid ${isMustHave ? '#4A9B5C' : '#E0D2C2'};background:${isMustHave ? 'rgba(74,155,92,0.08)' : '#fff'};color:${isMustHave ? '#2E7D46' : 'rgba(74,52,40,0.5)'};font-size:11px;font-weight:700;font-family:inherit;">
+            ${isMustHave ? '✅ ของจำเป็นต้องมีประจำร้าน (แตะเพื่อปิดเตือน)' : '⚪ ไม่ใช่ของจำเป็น (ไม่เตือนสต็อกต่ำ)'}
+          </button>
           <div class="stock-adjust">
             <input type="number" step="any" class="s-adjust-input" placeholder="ปรับยอดสต็อกเป็น...">
             <button class="s-adjust-btn" data-id="${i.id}">บันทึกยอดใหม่</button>
@@ -737,6 +741,23 @@ async function loadStockTab() {
           loadStockTab();
         } catch (e) {
           alert("ซ่อนไม่สำเร็จ: " + e.message);
+        }
+      });
+    });
+
+    listEl.querySelectorAll(".stock-musthave-toggle").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const current = btn.dataset.mustHave === "true";
+        btn.disabled = true;
+        try {
+          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ must_have: !current, updated_at: new Date().toISOString() })
+          });
+          loadStockTab();
+        } catch (e) {
+          alert("บันทึกไม่สำเร็จ: " + e.message);
+          btn.disabled = false;
         }
       });
     });
