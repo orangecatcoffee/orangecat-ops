@@ -106,6 +106,62 @@
   .stock-dismiss{background:none;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:2px 4px;opacity:.6;}
   .stock-dismiss:active{opacity:1;}
 
+  /* ===== STOCK TAB v2 — compact rows, collapsible groups ===== */
+  .stk-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .stk-title{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:rgba(74,52,40,0.4);font-weight:500;margin-right:auto;white-space:nowrap;}
+  .stk-bulk{display:flex;gap:6px;}
+  .stk-bulk button{font-family:inherit;font-size:10.5px;padding:4px 9px;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--ol);cursor:pointer;white-space:nowrap;}
+  .stk-switch{display:inline-flex;align-items:center;gap:6px;margin:0;font-size:11px;color:rgba(74,52,40,0.7);cursor:pointer;position:relative;font-weight:400;white-space:nowrap;}
+  .stk-switch input{position:absolute;opacity:0;width:1px;height:1px;padding:0;border:0;}
+  .stk-track{width:30px;height:18px;border-radius:999px;background:rgba(74,52,40,0.18);position:relative;transition:.2s;flex-shrink:0;}
+  .stk-track::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.2s;}
+  .stk-switch input:checked + .stk-track{background:var(--orange);}
+  .stk-switch input:checked + .stk-track::after{transform:translateX(12px);}
+  .stk-switch input:focus-visible + .stk-track{outline:2px solid rgba(232,134,58,0.5);outline-offset:2px;}
+  .stk-alert{background:rgba(220,60,60,0.08);border:1px solid rgba(220,100,100,0.3);border-radius:12px;padding:10px 12px;margin-bottom:12px;}
+  .stk-alert-h{font-size:11px;font-weight:600;color:var(--red);margin-bottom:4px;}
+  .stk-alert-r{font-size:11px;color:rgba(74,52,40,0.75);padding:1px 0;}
+  .stk-alert-r b{color:var(--red);}
+
+  .sg{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+  .sg-head{display:flex;align-items:center;gap:8px;width:100%;background:rgba(232,134,58,0.09);border:none;padding:11px 12px;cursor:pointer;font-family:inherit;color:var(--cream);text-align:left;-webkit-tap-highlight-color:transparent;}
+  .sg-chev{font-size:11px;color:var(--ol);transition:transform .2s;display:inline-block;width:12px;}
+  .sg.collapsed .sg-chev{transform:rotate(-90deg);}
+  .sg-title{font-size:13px;font-weight:600;flex:1;}
+  .sg-meta{display:flex;align-items:center;gap:6px;}
+  .sg-count{font-size:10.5px;color:var(--ol);background:#fff;border:1px solid var(--border);border-radius:999px;padding:1px 8px;}
+  .sg-warn{font-size:10.5px;color:var(--red);background:rgba(220,60,60,0.1);border-radius:999px;padding:1px 8px;font-weight:600;}
+  .sg.collapsed .sg-body{display:none;}
+
+  .sr{padding:10px 12px;border-top:1px solid var(--border);transition:background .6s;}
+  .sr.neg{background:rgba(220,60,60,0.05);}
+  .sr.low{background:rgba(230,180,50,0.08);}
+  .sr.saved{background:rgba(74,155,92,0.12);}
+  .sr-top{display:flex;align-items:center;gap:6px;}
+  .sr-name{flex:1;min-width:0;}
+  .sr-title{display:block;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sr-sub{display:block;font-size:9.5px;color:rgba(74,52,40,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sr-cost{font-size:11px;font-weight:600;color:var(--ol);background:rgba(232,98,26,0.12);border:1px solid rgba(232,98,26,0.25);border-radius:8px;padding:2px 7px;white-space:nowrap;}
+  .sr-cost.cost-high{color:var(--red);background:rgba(220,60,60,0.12);border-color:rgba(220,100,100,0.3);}
+  .sr-cost.cost-mid{color:#B8860B;background:rgba(230,180,50,0.15);border-color:rgba(230,180,50,0.35);}
+  .sr-cost.cost-low{color:var(--green);background:rgba(74,155,92,0.12);border-color:rgba(74,155,92,0.3);}
+  #view-stock.hide-cost .sr-cost{display:none;}
+  .sr-chip{font-size:10.5px;font-weight:700;border-radius:8px;padding:3px 8px;font-family:inherit;white-space:nowrap;cursor:pointer;border:1px solid;background:#fff;}
+  .sr-chip.on{border-color:#4A9B5C;color:#2E7D46;background:rgba(74,155,92,0.08);}
+  .sr-chip.off{border-color:#E0D2C2;color:rgba(74,52,40,0.5);}
+  .sr-x{background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:2px 4px;opacity:.5;font-family:inherit;}
+  .sr-x:active{opacity:1;}
+  .sr-edit{display:flex;align-items:center;gap:6px;margin-top:8px;}
+  .sr-field{display:flex;align-items:center;gap:4px;flex:1;min-width:0;margin:0;background:rgba(74,52,40,0.05);border:1px solid var(--border);border-radius:10px;padding:0 8px;font-weight:400;}
+  .sr-field:focus-within{border-color:rgba(232,98,26,0.5);}
+  .sr-field span{font-size:10px;color:rgba(74,52,40,0.5);white-space:nowrap;}
+  .sr-field em{font-style:normal;font-size:10px;color:rgba(74,52,40,0.4);}
+  .sr-field input{flex:1;min-width:0;width:100%;background:transparent;border:none;padding:8px 2px;font-size:16px;text-align:right;border-radius:0;}
+  .sr-save{flex-shrink:0;background:var(--orange);color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;}
+  .sr-save:disabled{background:rgba(74,52,40,0.1);color:rgba(74,52,40,0.3);cursor:default;}
+  .sr-note{font-size:10.5px;margin-top:6px;}
+  .sr-note.red{color:var(--red);}
+
   .recipe-table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;}
   .recipe-table{width:100%;border-collapse:collapse;font-size:12px;min-width:880px;}
   .recipe-table th{text-align:left;padding:8px 10px;color:rgba(74,52,40,0.4);font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
@@ -287,10 +343,16 @@
 <!-- ============ TAB 2: STOCK ============ -->
 <div class="view" id="view-stock">
 
-  <div class="card">
-    <div class="card-title">สต็อกคงเหลือ</div>
-    <div id="s-list"><div class="loading">กำลังโหลด...</div></div>
+  <div class="stk-toolbar">
+    <div class="stk-title">สต็อกคงเหลือ</div>
+    <div class="stk-bulk">
+      <button type="button" data-act="expand-all">กางทั้งหมด</button>
+      <button type="button" data-act="collapse-all">ยุบทั้งหมด</button>
+    </div>
+    <label class="stk-switch"><input type="checkbox" id="s-show-cost" checked><span class="stk-track"></span><span>ต้นทุน ฿/20g</span></label>
   </div>
+  <div id="s-alert"></div>
+  <div id="s-list"><div class="loading">กำลังโหลด...</div></div>
 
 </div>
 
@@ -648,162 +710,289 @@ document.getElementById("p-submit").addEventListener("click", async () => {
 // ---------- STOCK TAB ----------
 let stockLoaded = false;
 let receiptsLoaded = false;
-async function loadStockTab() {
-  const listEl = document.getElementById("s-list");
-  listEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
-  try {
-    const ings = await sb("ingredients?select=*&active=eq.true&order=category,name");
 
-    if (!ings.length) {
-      listEl.innerHTML = '<div class="empty">ยังไม่มีวัตถุดิบในระบบ</div>';
+const STOCK_GROUPS = [
+  { title: "เมล็ดกาแฟ", match: c => c === "coffee_bean" },
+  { title: "เบส (มัทฉะ/ชาไทย/โกโก้)", match: c => c === "base" },
+  { title: "มิกเซอร์", match: c => c === "milk" || c === "other" },
+  { title: "ปรุงแต่ง", match: c => c === "syrup" },
+  { title: "อื่นๆ", match: c => ![ "coffee_bean", "base", "milk", "other", "syrup" ].includes(c) },
+];
+const LS_STOCK_COLLAPSED = "ops_stock_collapsed_groups";
+const LS_STOCK_SHOW_COST = "ops_stock_show_cost";
+let stockState = { ings: [], recipeMax: {} };
+let stockWired = false;
+
+function stkLsGet(k, def) { try { const v = localStorage.getItem(k); return v === null ? def : JSON.parse(v); } catch (e) { return def; } }
+function stkLsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function stkEsc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function stkNum(v) { if (v === null || v === undefined || v === "") return ""; const n = Number(v); return Number.isFinite(n) ? String(n) : ""; }
+function stkGroupOf(i) { return STOCK_GROUPS.find(g => g.match(i.category)); }
+
+// ทำได้อีกกี่แก้ว — logic เดียวกับ computeCupsRemainingMap (coffee_bean = 20g/แก้ว, อื่นๆ = สูตรที่ใช้เยอะสุด) แต่คำนวณในเครื่อง ไม่ต้อง query ใหม่ทุกครั้งที่ปรับเลข
+function stkCups(i) {
+  const stock = Number(i.stock_quantity);
+  if (i.category === "coffee_bean") return Math.floor(stock / 20);
+  const mx = stockState.recipeMax[i.id];
+  return mx > 0 ? Math.floor(stock / mx) : null;
+}
+function stkIsAlert(i) { const c = stkCups(i); return i.must_have !== false && c !== null && c < 2; }
+function stkIsNeg(i) { return Number(i.stock_quantity) < 0; }
+
+function stkRowHtml(i) {
+  const isMust = i.must_have !== false;
+  const cups = stkCups(i);
+  const neg = stkIsNeg(i);
+  const low = stkIsAlert(i);
+  let cost = "";
+  if (i.base_unit === "g" && i.cost_per_base_unit) {
+    const c20 = Number(i.cost_per_base_unit) * 20;
+    let tier = "";
+    if (i.category === "coffee_bean") tier = c20 >= 23 ? " cost-high" : (c20 <= 17 ? " cost-low" : " cost-mid");
+    cost = `<span class="sr-cost${tier}">฿${Math.round(c20)}</span>`;
+  }
+  const unit = stkEsc(i.base_unit || "");
+  const note = neg
+    ? `<div class="sr-note red">⚠️ สต็อกติดลบ — ตรวจนับของจริงแล้วปรับยอด</div>`
+    : (low ? `<div class="sr-note red">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>` : "");
+  return `<div class="sr${neg ? " neg" : (low ? " low" : "")}" data-ing-id="${stkEsc(i.id)}">
+    <div class="sr-top">
+      <div class="sr-name"><span class="sr-title">${stkEsc(i.name)}</span><span class="sr-sub">${stkEsc(CAT_LABEL[i.category] || i.category)}${i.supplier ? " · " + stkEsc(i.supplier) : ""}</span></div>
+      ${cost}
+      <button type="button" class="sr-chip ${isMust ? "on" : "off"}" data-act="must" title="${isMust ? "ของจำเป็นประจำร้าน — แตะเพื่อปิดการเตือนสต็อกต่ำ" : "ไม่ใช่ของจำเป็น (ไม่เตือนสต็อกต่ำ) — แตะเพื่อเปิดเตือน"}">${isMust ? "✅ จำเป็น" : "⚪ ไม่จำเป็น"}</button>
+      <button type="button" class="sr-x" data-act="hide" title="ซ่อนออกจากลิสต์" aria-label="ซ่อน ${stkEsc(i.name)}">✕</button>
+    </div>
+    <div class="sr-edit">
+      <label class="sr-field"><span>คงเหลือ</span><input type="number" inputmode="decimal" step="any" data-f="stock" value="${stkNum(i.stock_quantity)}" aria-label="ยอดสต็อกคงเหลือ"><em>${unit}</em></label>
+      <label class="sr-field"><span>เตือนที่</span><input type="number" inputmode="decimal" step="any" data-f="par" value="${stkNum(i.par_level)}" placeholder="–" aria-label="ระดับเตือนล่วงหน้า (par level)"><em>${unit}</em></label>
+      <button type="button" class="sr-save" data-act="save" disabled>บันทึก</button>
+    </div>
+    ${note}
+  </div>`;
+}
+
+function stkGroupItems(g) { return stockState.ings.filter(i => stkGroupOf(i) === g); }
+function stkNeedsAttention(i) { return i.must_have !== false && (stkIsNeg(i) || stkIsAlert(i)); }
+function stkWarnCount(items) { return items.filter(stkNeedsAttention).length; }
+
+function stkGroupMetaHtml(items) {
+  const warn = stkWarnCount(items);
+  return `<span class="sg-count">${items.length}</span>${warn ? `<span class="sg-warn">🔴 ${warn}</span>` : ""}`;
+}
+
+function stkAlertHtml() {
+  const low = stockState.ings.filter(stkNeedsAttention);
+  if (!low.length) return "";
+  return `<div class="stk-alert">
+    <div class="stk-alert-h">🔴 ต้องจัดการ — สต็อกไม่พอสำหรับ 2 แก้วขึ้นไป หรือติดลบ</div>
+    ${low.map(i => stkIsNeg(i)
+      ? `<div class="stk-alert-r">${stkEsc(i.name)} — <b>ติดลบ</b> (${Number(i.stock_quantity).toLocaleString()}${stkEsc(i.base_unit)}) ตรวจนับแล้วปรับยอด</div>`
+      : `<div class="stk-alert-r">${stkEsc(i.name)} — ทำได้อีกแค่ <b>${stkCups(i)} แก้ว</b> (เหลือ ${Number(i.stock_quantity).toLocaleString()}${stkEsc(i.base_unit)})</div>`).join("")}
+  </div>`;
+}
+
+// อัปเดตเฉพาะตัวเลขสรุป (หัวกลุ่ม + กล่องเตือน) โดยไม่แตะแถวอื่น — กันค่าที่กำลังพิมพ์ค้างอยู่หาย และกันหน้ากระโดด
+function stkRefreshSummaries() {
+  STOCK_GROUPS.forEach(g => {
+    const sec = document.querySelector(`#s-list .sg[data-group="${CSS.escape(g.title)}"]`);
+    if (!sec) return;
+    const items = stkGroupItems(g);
+    if (!items.length) { sec.remove(); return; }
+    sec.querySelector(".sg-meta").innerHTML = stkGroupMetaHtml(items);
+  });
+  document.getElementById("s-alert").innerHTML = stkAlertHtml();
+}
+
+function stkRenderAll() {
+  const listEl = document.getElementById("s-list");
+  const collapsed = stkLsGet(LS_STOCK_COLLAPSED, []);
+  let html = "";
+  STOCK_GROUPS.forEach(g => {
+    const items = stkGroupItems(g);
+    if (!items.length) return;
+    const isCollapsed = collapsed.includes(g.title);
+    html += `<section class="sg${isCollapsed ? " collapsed" : ""}" data-group="${stkEsc(g.title)}">
+      <button type="button" class="sg-head" data-act="toggle-group" aria-expanded="${!isCollapsed}">
+        <span class="sg-chev">▾</span><span class="sg-title">${stkEsc(g.title)}</span><span class="sg-meta">${stkGroupMetaHtml(items)}</span>
+      </button>
+      <div class="sg-body">${items.map(stkRowHtml).join("")}</div>
+    </section>`;
+  });
+  listEl.innerHTML = html || '<div class="empty">ยังไม่มีวัตถุดิบในระบบ</div>';
+  listEl.dataset.ready = "1";
+  document.getElementById("s-alert").innerHTML = stkAlertHtml();
+}
+
+function stkSaveCollapsed() {
+  const titles = [...document.querySelectorAll("#s-list .sg.collapsed")].map(s => s.dataset.group);
+  stkLsSet(LS_STOCK_COLLAPSED, titles);
+}
+
+// เทียบค่าในช่องกับค่าจริงในระบบ → คืนเฉพาะฟิลด์ที่เปลี่ยนจริง (ช่องคงเหลือเว้นว่าง = ไม่แก้, ช่อง par เว้นว่าง = ไม่ติดตาม)
+function stkCollectChanges(row, ing) {
+  const body = {};
+  const sRaw = row.querySelector('[data-f="stock"]').value.trim();
+  const pRaw = row.querySelector('[data-f="par"]').value.trim();
+  const sVal = sRaw === "" ? null : parseFloat(sRaw);
+  const pVal = pRaw === "" ? null : parseFloat(pRaw);
+  if ((sRaw !== "" && isNaN(sVal)) || (pRaw !== "" && isNaN(pVal))) return { error: "กรอกตัวเลขก่อนนะ" };
+  if (sVal !== null && sVal !== Number(ing.stock_quantity)) body.stock_quantity = sVal;
+  const pOld = ing.par_level === null || ing.par_level === undefined ? null : Number(ing.par_level);
+  if (pVal !== pOld) body.par_level = pVal;
+  return { body };
+}
+
+function stkUpdateDirty(row) {
+  const ing = stockState.ings.find(x => x.id === row.dataset.ingId);
+  if (!ing) return;
+  const { body, error } = stkCollectChanges(row, ing);
+  row.querySelector(".sr-save").disabled = !!error || !Object.keys(body || {}).length;
+}
+
+function stkReplaceRow(ing, opts = {}) {
+  const el = document.querySelector(`#s-list .sr[data-ing-id="${CSS.escape(ing.id)}"]`);
+  if (!el) return;
+  const keep = opts.keepInputs ? { stock: el.querySelector('[data-f="stock"]').value, par: el.querySelector('[data-f="par"]').value } : null;
+  const tmp = document.createElement("div");
+  tmp.innerHTML = stkRowHtml(ing);
+  const neu = tmp.firstElementChild;
+  if (keep) {
+    neu.querySelector('[data-f="stock"]').value = keep.stock;
+    neu.querySelector('[data-f="par"]').value = keep.par;
+  }
+  el.replaceWith(neu);
+  if (keep) stkUpdateDirty(neu);
+  if (opts.flash) {
+    neu.classList.add("saved");
+    setTimeout(() => neu.classList.remove("saved"), 1200);
+  }
+  stkRefreshSummaries();
+}
+
+function stkWire() {
+  if (stockWired) return;
+  stockWired = true;
+  const root = document.getElementById("view-stock");
+
+  root.addEventListener("change", (e) => {
+    if (e.target.id === "s-show-cost") {
+      root.classList.toggle("hide-cost", !e.target.checked);
+      stkLsSet(LS_STOCK_SHOW_COST, e.target.checked);
+    }
+  });
+
+  root.addEventListener("input", (e) => {
+    const row = e.target.closest(".sr");
+    if (row && e.target.matches("input[data-f]")) stkUpdateDirty(row);
+  });
+
+  root.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" || !e.target.matches("input[data-f]")) return;
+    const btn = e.target.closest(".sr").querySelector(".sr-save");
+    if (!btn.disabled) btn.click();
+  });
+
+  root.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-act]");
+    if (!btn || !root.contains(btn)) return;
+    const act = btn.dataset.act;
+
+    if (act === "toggle-group") {
+      const sec = btn.closest(".sg");
+      const nowCollapsed = sec.classList.toggle("collapsed");
+      btn.setAttribute("aria-expanded", String(!nowCollapsed));
+      stkSaveCollapsed();
+      return;
+    }
+    if (act === "collapse-all" || act === "expand-all") {
+      const collapse = act === "collapse-all";
+      document.querySelectorAll("#s-list .sg").forEach(sec => {
+        sec.classList.toggle("collapsed", collapse);
+        sec.querySelector(".sg-head").setAttribute("aria-expanded", String(!collapse));
+      });
+      stkSaveCollapsed();
       return;
     }
 
-    const cupsMap = await computeCupsRemainingMap(ings);
-    const lowItems = ings.filter(i => i.must_have !== false && cupsMap[i.id] !== null && cupsMap[i.id] < 2);
+    const row = btn.closest(".sr");
+    if (!row) return;
+    const ing = stockState.ings.find(x => x.id === row.dataset.ingId);
+    if (!ing) return;
 
-    const GROUPS = [
-      { title: "เมล็ดกาแฟ", match: c => c === "coffee_bean" },
-      { title: "เบส (มัทฉะ/ชาไทย/โกโก้)", match: c => c === "base" },
-      { title: "มิกเซอร์", match: c => c === "milk" || c === "other" },
-      { title: "ปรุงแต่ง", match: c => c === "syrup" },
-      { title: "อื่นๆ", match: c => !["coffee_bean", "base", "milk", "other", "syrup"].includes(c) },
-    ];
-
-    let html = "";
-    if (lowItems.length) {
-      html += `<div style="background:rgba(220,60,60,0.1);border:1px solid rgba(220,100,100,0.3);border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-        <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:6px;">🔴 ควรซื้อเพิ่มด่วน — วัตถุดิบเหล่านี้ไม่พอสำหรับ 2 แก้วขึ้นไป</div>
-        ${lowItems.map(i => `<div style="font-size:11px;color:rgba(74,52,40,0.75);padding:2px 0;">${i.name} — ทำได้อีกแค่ <b style="color:var(--red);">${cupsMap[i.id]} แก้ว</b> (เหลือ ${Number(i.stock_quantity).toLocaleString()}${i.base_unit})</div>`).join("")}
-      </div>`;
+    if (act === "save") {
+      const { body, error } = stkCollectChanges(row, ing);
+      if (error) { alert(error); return; }
+      if (!Object.keys(body).length) return;
+      body.updated_at = new Date().toISOString();
+      btn.disabled = true; btn.textContent = "กำลังบันทึก...";
+      try {
+        const res = await sb(`ingredients?id=eq.${encodeURIComponent(ing.id)}`, { method: "PATCH", body: JSON.stringify(body) });
+        Object.assign(ing, Array.isArray(res) && res[0] ? res[0] : body);
+        stkReplaceRow(ing, { flash: true });
+      } catch (err) {
+        alert("บันทึกไม่สำเร็จ: " + err.message);
+        btn.disabled = false; btn.textContent = "บันทึก";
+      }
+      return;
     }
-    GROUPS.forEach(g => {
-      const items = ings.filter(i => g.match(i.category));
-      if (!items.length) return;
-      html += `<div class="stock-group-heading">${g.title}</div>`;
-      html += items.map(i => {
-        const cups = cupsMap[i.id];
-        const isMustHave = i.must_have !== false;
-        const lowWarning = isMustHave && cups !== null && cups < 2
-          ? `<div style="font-size:10.5px;color:var(--red);margin-top:6px;">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>`
-          : "";
-        let cost20Badge = "";
-        if (i.base_unit === "g" && i.cost_per_base_unit) {
-          const c20 = Number(i.cost_per_base_unit) * 20;
-          let tier = "";
-          if (i.category === "coffee_bean") {
-            if (c20 >= 23) tier = " cost-high";
-            else if (c20 <= 17) tier = " cost-low";
-            else tier = " cost-mid";
-          }
-          cost20Badge = `<div class="stock-cost-badge${tier}">฿${Math.round(c20)}</div>`;
-        }
-        return `
-        <div class="stock-card" data-ing-id="${i.id}">
-          <div class="stock-head">
-            <div>
-              <div class="stock-name">${i.name}</div>
-              <div class="stock-sub">${CAT_LABEL[i.category] || i.category}${i.supplier ? " · " + i.supplier : ""}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              ${cost20Badge}
-              <div class="stock-qty">${Number(i.stock_quantity).toLocaleString()} ${i.base_unit}</div>
-              <button class="stock-dismiss" data-id="${i.id}" data-name="${i.name.replace(/"/g,'&quot;')}" title="ซ่อนออกจากลิสต์">✕</button>
-            </div>
-          </div>
-          ${lowWarning}
-          <button type="button" class="stock-musthave-toggle" data-id="${i.id}" data-must-have="${isMustHave}" style="width:100%;margin-top:6px;padding:7px;border-radius:8px;border:1.5px solid ${isMustHave ? '#4A9B5C' : '#E0D2C2'};background:${isMustHave ? 'rgba(74,155,92,0.08)' : '#fff'};color:${isMustHave ? '#2E7D46' : 'rgba(74,52,40,0.5)'};font-size:11px;font-weight:700;font-family:inherit;">
-            ${isMustHave ? '✅ ของจำเป็นต้องมีประจำร้าน (แตะเพื่อปิดเตือน)' : '⚪ ไม่ใช่ของจำเป็น (ไม่เตือนสต็อกต่ำ)'}
-          </button>
-          <div class="stock-adjust">
-            <input type="number" step="any" class="s-adjust-input" placeholder="ปรับยอดสต็อกเป็น...">
-            <button class="s-adjust-btn" data-id="${i.id}">บันทึกยอดใหม่</button>
-          </div>
-          <div class="stock-adjust" style="margin-top:6px;">
-            <input type="number" step="any" class="s-par-input" placeholder="Par level (เตือนล่วงหน้า)" value="${i.par_level ?? ''}">
-            <button class="s-par-btn" data-id="${i.id}">บันทึก par</button>
-          </div>
-        </div>
-      `;
-      }).join("");
-    });
 
-    listEl.innerHTML = html;
+    if (act === "must") {
+      const current = ing.must_have !== false;
+      btn.disabled = true;
+      try {
+        const res = await sb(`ingredients?id=eq.${encodeURIComponent(ing.id)}`, { method: "PATCH", body: JSON.stringify({ must_have: !current, updated_at: new Date().toISOString() }) });
+        Object.assign(ing, Array.isArray(res) && res[0] ? res[0] : { must_have: !current });
+        stkReplaceRow(ing, { keepInputs: true });
+      } catch (err) {
+        alert("บันทึกไม่สำเร็จ: " + err.message);
+        btn.disabled = false;
+      }
+      return;
+    }
 
-    listEl.querySelectorAll(".stock-dismiss").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        if (!confirm(`ซ่อน "${btn.dataset.name}" ออกจากลิสต์สต็อกใช่ไหม? (ไม่ลบข้อมูล แค่ไม่โชว์ในหน้านี้ — ถ้าซื้อใหม่อีกครั้งบอกในแชทให้เปิดกลับมาได้)`)) return;
-        try {
-          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ active: false, updated_at: new Date().toISOString() })
-          });
-          loadStockTab();
-        } catch (e) {
-          alert("ซ่อนไม่สำเร็จ: " + e.message);
-        }
-      });
-    });
+    if (act === "hide") {
+      if (!confirm(`ซ่อน "${ing.name}" ออกจากลิสต์สต็อกใช่ไหม? (ไม่ลบข้อมูล แค่ไม่โชว์ในหน้านี้ — ถ้าซื้อใหม่อีกครั้งบอกในแชทให้เปิดกลับมาได้)`)) return;
+      try {
+        await sb(`ingredients?id=eq.${encodeURIComponent(ing.id)}`, { method: "PATCH", body: JSON.stringify({ active: false, updated_at: new Date().toISOString() }) });
+        stockState.ings = stockState.ings.filter(x => x.id !== ing.id);
+        row.remove();
+        stkRefreshSummaries();
+      } catch (err) {
+        alert("ซ่อนไม่สำเร็จ: " + err.message);
+      }
+    }
+  });
+}
 
-    listEl.querySelectorAll(".stock-musthave-toggle").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const current = btn.dataset.mustHave === "true";
-        btn.disabled = true;
-        try {
-          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ must_have: !current, updated_at: new Date().toISOString() })
-          });
-          loadStockTab();
-        } catch (e) {
-          alert("บันทึกไม่สำเร็จ: " + e.message);
-          btn.disabled = false;
-        }
-      });
+async function loadStockTab() {
+  const listEl = document.getElementById("s-list");
+  const root = document.getElementById("view-stock");
+  // โหลดซ้ำ (เช่นหลังบันทึกซื้อของ) ไม่ล้างลิสต์เป็น "กำลังโหลด..." — กันความสูงหน้าหดแล้วเด้งขึ้นบนสุด
+  if (!listEl.dataset.ready) listEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
+  try {
+    const [ings, recipeRows] = await Promise.all([
+      sb("ingredients?select=*&active=eq.true&order=category,name"),
+      sb("menu_recipes?select=ingredient_id,quantity"),
+    ]);
+    const recipeMax = {};
+    (recipeRows || []).forEach(r => {
+      if (!r.ingredient_id) return;
+      const q = Number(r.quantity);
+      if (!(q > (recipeMax[r.ingredient_id] || 0))) return;
+      recipeMax[r.ingredient_id] = q;
     });
+    stockState = { ings: ings || [], recipeMax };
 
-    listEl.querySelectorAll(".s-adjust-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const card = btn.closest(".stock-card");
-        const input = card.querySelector(".s-adjust-input");
-        const val = parseFloat(input.value);
-        if (isNaN(val)) { alert("กรอกตัวเลขก่อนนะ"); return; }
-        btn.disabled = true; btn.textContent = "กำลังบันทึก...";
-        try {
-          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ stock_quantity: val, updated_at: new Date().toISOString() })
-          });
-          loadStockTab();
-        } catch (e) {
-          alert("ปรับยอดไม่สำเร็จ: " + e.message);
-          btn.disabled = false; btn.textContent = "บันทึกยอดใหม่";
-        }
-      });
-    });
-    listEl.querySelectorAll(".s-par-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const card = btn.closest(".stock-card");
-        const input = card.querySelector(".s-par-input");
-        const raw = input.value.trim();
-        const val = raw === "" ? null : parseFloat(raw);
-        if (raw !== "" && isNaN(val)) { alert("กรอกตัวเลขก่อนนะ (หรือเว้นว่างไว้ถ้าไม่อยากติดตาม)"); return; }
-        btn.disabled = true; btn.textContent = "กำลังบันทึก...";
-        try {
-          await sb(`ingredients?id=eq.${btn.dataset.id}`, {
-            method: "PATCH",
-            body: JSON.stringify({ par_level: val, updated_at: new Date().toISOString() })
-          });
-          btn.textContent = "✓ บันทึกแล้ว";
-          setTimeout(() => { btn.textContent = "บันทึก par"; btn.disabled = false; }, 1200);
-        } catch (e) {
-          alert("บันทึกไม่สำเร็จ: " + e.message);
-          btn.disabled = false; btn.textContent = "บันทึก par";
-        }
-      });
-    });
+    const showCost = stkLsGet(LS_STOCK_SHOW_COST, true);
+    root.classList.toggle("hide-cost", !showCost);
+    document.getElementById("s-show-cost").checked = !!showCost;
+
+    const y = window.scrollY;
+    stkRenderAll();
+    stkWire();
+    window.scrollTo(0, y);
   } catch (e) {
-    listEl.innerHTML = '<div class="empty">โหลดไม่สำเร็จ: ' + e.message + '</div>';
+    listEl.innerHTML = '<div class="empty">โหลดไม่สำเร็จ: ' + stkEsc(e.message) + '</div>';
   }
 }
 
