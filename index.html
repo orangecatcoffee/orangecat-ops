@@ -971,7 +971,7 @@ async function loadStockTab() {
   if (!listEl.dataset.ready) listEl.innerHTML = '<div class="loading">กำลังโหลด...</div>';
   try {
     const [ings, recipeRows] = await Promise.all([
-      sb("ingredients?select=*&active=eq.true&order=category,name"),
+      sb("ingredients?select=*&active=eq.true&track_stock=eq.true&order=category,name"),
       sb("menu_recipes?select=ingredient_id,quantity"),
     ]);
     const recipeMax = {};
