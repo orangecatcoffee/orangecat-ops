@@ -160,6 +160,22 @@
   .sr-save{flex-shrink:0;background:var(--orange);color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;}
   .sr-save:disabled{background:rgba(74,52,40,0.1);color:rgba(74,52,40,0.3);cursor:default;}
   .sr-note{font-size:10.5px;margin-top:6px;}
+  .sr-name[data-act="more"]{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .sr-caret{font-size:9px;color:var(--ol);margin-left:4px;display:inline-block;transition:transform .2s;}
+  .sr.more-open .sr-caret{transform:rotate(180deg);}
+  .sr-more{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);}
+  .sr-add{display:flex;align-items:center;gap:6px;}
+  .sr-add > span{font-size:11px;color:rgba(74,52,40,0.6);white-space:nowrap;}
+  .sr-add .sr-field{flex:1;}
+  .sr-add-btn{flex-shrink:0;background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap;}
+  .sr-add-btn:disabled{background:rgba(74,52,40,0.1);color:rgba(74,52,40,0.3);cursor:default;}
+  .sr-add-hint{font-size:10px;color:rgba(74,52,40,0.4);margin-top:4px;}
+  .sr-hist{margin-top:10px;}
+  .sr-hist-h{font-size:10px;letter-spacing:1px;color:rgba(74,52,40,0.4);margin-bottom:4px;}
+  .sr-hist-r{display:flex;justify-content:space-between;gap:8px;font-size:11px;padding:3px 0;color:rgba(74,52,40,0.7);border-bottom:1px solid var(--border);}
+  .sr-hist-r:last-child{border-bottom:none;}
+  .sr-hist-r .up{color:var(--green);font-weight:600;} .sr-hist-r .down{color:var(--red);font-weight:600;}
+  .sr-hist-empty{font-size:11px;color:rgba(74,52,40,0.35);}
   .sr-note.red{color:var(--red);}
 
   .recipe-table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;}
@@ -757,7 +773,7 @@ function stkRowHtml(i) {
     : (low ? `<div class="sr-note red">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>` : "");
   return `<div class="sr${neg ? " neg" : (low ? " low" : "")}" data-ing-id="${stkEsc(i.id)}">
     <div class="sr-top">
-      <div class="sr-name"><span class="sr-title">${stkEsc(i.name)}</span><span class="sr-sub">${stkEsc(CAT_LABEL[i.category] || i.category)}${i.supplier ? " · " + stkEsc(i.supplier) : ""}</span></div>
+      <div class="sr-name" data-act="more" role="button" tabindex="0" aria-label="เพิ่มสต็อก / ดูประวัติ ${stkEsc(i.name)}"><span class="sr-title">${stkEsc(i.name)}<span class="sr-caret">▼</span></span><span class="sr-sub">${stkEsc(CAT_LABEL[i.category] || i.category)}${i.supplier ? " · " + stkEsc(i.supplier) : ""}</span></div>
       ${cost}
       <button type="button" class="sr-chip ${isMust ? "on" : "off"}" data-act="must" title="${isMust ? "ของจำเป็นประจำร้าน — แตะเพื่อปิดการเตือนสต็อกต่ำ" : "ไม่ใช่ของจำเป็น (ไม่เตือนสต็อกต่ำ) — แตะเพื่อเปิดเตือน"}">${isMust ? "✅ จำเป็น" : "⚪ ไม่จำเป็น"}</button>
       <button type="button" class="sr-x" data-act="hide" title="ซ่อนออกจากลิสต์" aria-label="ซ่อน ${stkEsc(i.name)}">✕</button>
@@ -768,6 +784,7 @@ function stkRowHtml(i) {
       <button type="button" class="sr-save" data-act="save" disabled>บันทึก</button>
     </div>
     ${note}
+    <div class="sr-more" hidden></div>
   </div>`;
 }
 
@@ -883,13 +900,21 @@ function stkWire() {
 
   root.addEventListener("input", (e) => {
     const row = e.target.closest(".sr");
-    if (row && e.target.matches("input[data-f]")) stkUpdateDirty(row);
+    if (!row || !e.target.matches("input[data-f]")) return;
+    if (e.target.dataset.f === "add") {
+      const v = parseFloat(e.target.value);
+      row.querySelector(".sr-add-btn").disabled = !(v > 0);
+      return;
+    }
+    stkUpdateDirty(row);
   });
 
   root.addEventListener("keydown", (e) => {
+    if (e.target.matches('.sr-name[data-act="more"]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.target.click(); return; }
     if (e.key !== "Enter" || !e.target.matches("input[data-f]")) return;
-    const btn = e.target.closest(".sr").querySelector(".sr-save");
-    if (!btn.disabled) btn.click();
+    const row = e.target.closest(".sr");
+    const btn = row.querySelector(e.target.dataset.f === "add" ? ".sr-add-btn" : ".sr-save");
+    if (btn && !btn.disabled) btn.click();
   });
 
   root.addEventListener("click", async (e) => {
@@ -918,6 +943,55 @@ function stkWire() {
     if (!row) return;
     const ing = stockState.ings.find(x => x.id === row.dataset.ingId);
     if (!ing) return;
+
+    if (act === "more") {
+      const panel = row.querySelector(".sr-more");
+      if (!panel.hidden) { panel.hidden = true; row.classList.remove("more-open"); return; }
+      panel.hidden = false; row.classList.add("more-open");
+      const unit = stkEsc(ing.base_unit || "");
+      panel.innerHTML = `
+        <div class="sr-add">
+          <span>＋ เพิ่มสต็อก</span>
+          <label class="sr-field"><input type="number" inputmode="decimal" step="any" min="0" data-f="add" placeholder="เช่น ทำเพิ่ม 500" aria-label="จำนวนที่เพิ่ม"><em>${unit}</em></label>
+          <button type="button" class="sr-add-btn" data-act="add" disabled>เพิ่ม</button>
+        </div>
+        <div class="sr-add-hint">ใช้เมื่อทำของเองเพิ่ม (เช่น วุ้น/แยม) หรือของเข้าที่ไม่ผ่านหน้าจัดซื้อ — บวกเข้ายอดเดิมทันที</div>
+        <div class="sr-hist"><div class="sr-hist-h">ยอดเปลี่ยนล่าสุด</div><div class="sr-hist-body sr-hist-empty">กำลังโหลด...</div></div>`;
+      try {
+        const rows = await sb(`stock_movements?ingredient_id=eq.${encodeURIComponent(ing.id)}&order=changed_at.desc&limit=8&select=old_qty,new_qty,delta,changed_at`);
+        const body = panel.querySelector(".sr-hist-body");
+        if (!rows || !rows.length) {
+          body.textContent = "ยังไม่มีประวัติ — เริ่มบันทึกยอดที่เปลี่ยนตั้งแต่ 3 ต.ค. 2569 (ไม่ระบุสาเหตุ ดูจากเวลา)";
+        } else {
+          body.className = "sr-hist-body";
+          body.innerHTML = rows.map(r => {
+            const d = Number(r.delta);
+            const when = new Date(r.changed_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+            const oldTxt = r.old_qty === null ? "–" : Number(r.old_qty).toLocaleString();
+            return `<div class="sr-hist-r"><span>${stkEsc(when)}</span><span>${oldTxt} → ${Number(r.new_qty).toLocaleString()} <span class="${d >= 0 ? "up" : "down"}">(${d >= 0 ? "+" : ""}${d.toLocaleString()})</span></span></div>`;
+          }).join("");
+        }
+      } catch (err) {
+        panel.querySelector(".sr-hist-body").textContent = "โหลดประวัติไม่สำเร็จ";
+      }
+      return;
+    }
+
+    if (act === "add") {
+      const input = row.querySelector('[data-f="add"]');
+      const delta = parseFloat(input.value);
+      if (!(delta > 0)) return;
+      btn.disabled = true; btn.textContent = "กำลังเพิ่ม...";
+      try {
+        const newQty = await sb("rpc/adjust_stock", { method: "POST", body: JSON.stringify({ p_ingredient_id: ing.id, p_delta: delta }) });
+        ing.stock_quantity = newQty;
+        stkReplaceRow(ing, { flash: true });
+      } catch (err) {
+        alert("เพิ่มสต็อกไม่สำเร็จ: " + err.message);
+        btn.disabled = false; btn.textContent = "เพิ่ม";
+      }
+      return;
+    }
 
     if (act === "save") {
       const { body, error } = stkCollectChanges(row, ing);
