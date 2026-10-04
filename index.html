@@ -796,6 +796,12 @@ function stkRowHtml(i) {
     const tier = c20 >= 23 ? " cost-high" : (c20 <= 17 ? " cost-low" : " cost-mid");
     cost = `<span class="sr-cost${tier}">฿${Math.round(c20)}</span>`;
   }
+  // มัทฉะแต่ละยี่ห้อราคาต่างกันมาก (฿3–20/g) — โชว์ ฿/g แยกรายตัว
+  if (stkGroupKey(i) === "matcha" && i.cost_per_base_unit) {
+    const cg = Number(i.cost_per_base_unit);
+    const tier = cg >= 12 ? " cost-high" : (cg <= 5 ? " cost-low" : " cost-mid");
+    cost = `<span class="sr-cost${tier}">฿${cg < 10 ? cg.toFixed(1) : Math.round(cg)}/g</span>`;
+  }
   const unit = stkEsc(i.base_unit || "");
   const qtyTxt = `${Number(i.stock_quantity || 0).toLocaleString()} ${unit}`;
   const status = neg ? "ติดลบ — ตรวจนับแล้วปรับยอด"
