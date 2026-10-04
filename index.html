@@ -330,8 +330,8 @@
     <input id="p-cost" type="number" step="any" placeholder="143">
 
     <label>ซัพพลายเออร์ / จ่ายให้ใคร</label>
-    <div id="p-supplier-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
-    <input id="p-supplier" type="text" placeholder="เช่น StayHere Coffee — หรือแตะจากลิสต์ด้านบน">
+    <input id="p-supplier" type="text" list="p-supplier-list" placeholder="เช่น StayHere Coffee — พิมพ์แล้วเลือกจากที่แนะนำได้เลย">
+    <datalist id="p-supplier-list"></datalist>
 
     <label>หมายเหตุ</label>
     <input id="p-notes" type="text" placeholder="ไม่บังคับ">
@@ -540,22 +540,15 @@ document.getElementById("p-name-select").addEventListener("change", (e) => {
   setNewItemMode(e.target.value === "__new__");
 });
 
-// ซัพพลายเออร์ที่เคยใช้ — โชว์เป็นชิปให้แตะเลือก ไม่ต้องพิมพ์ซ้ำทุกครั้ง
+// ซัพพลายเออร์ที่เคยใช้ — เติมใน <datalist> ให้ขึ้นเป็น dropdown คำแนะนำใต้ช่องพิมพ์อัตโนมัติ (แบบเดียวกับ Google)
 async function loadSupplierChips() {
-  const el = document.getElementById("p-supplier-chips");
+  const el = document.getElementById("p-supplier-list");
   try {
     const rows = await sb("purchase_log?select=supplier&supplier=not.is.null&order=created_at.desc&limit=200");
     const counts = {};
     rows.forEach(r => { if (r.supplier) counts[r.supplier] = (counts[r.supplier] || 0) + 1; });
-    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([name]) => name);
-    el.innerHTML = top.map(name => `<button type="button" class="supplier-chip" data-name="${name.replace(/"/g,'&quot;')}" style="padding:6px 12px;border-radius:999px;border:1.5px solid #E4DCC8;background:#fff;color:#8a6a4a;font-size:11.5px;font-family:inherit;">${name}</button>`).join("");
-    el.querySelectorAll(".supplier-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        document.getElementById("p-supplier").value = chip.dataset.name;
-        el.querySelectorAll(".supplier-chip").forEach(c => { c.style.borderColor = "#E4DCC8"; c.style.background = "#fff"; c.style.color = "#8a6a4a"; });
-        chip.style.borderColor = "#E8863A"; chip.style.background = "#FFF3E8"; chip.style.color = "#E8863A";
-      });
-    });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([name]) => name);
+    el.innerHTML = top.map(name => `<option value="${name.replace(/"/g,'&quot;')}">`).join("");
   } catch (e) { /* เงียบไว้ ไม่บล็อกการกรอกฟอร์ม */ }
 }
 loadSupplierChips();
