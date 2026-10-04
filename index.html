@@ -178,6 +178,34 @@
   .sr-hist-empty{font-size:11px;color:rgba(74,52,40,0.35);}
   .sr-note.red{color:var(--red);}
 
+  /* --- minimal stock rows (4 ต.ค. 2569) --- */
+  .sr{padding:0;}
+  .sr.neg,.sr.low{background:transparent;}
+  .sr-line{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .sr-dot{width:8px;height:8px;border-radius:50%;background:rgba(74,155,92,0.55);flex-shrink:0;}
+  .sr.low .sr-dot,.sr.neg .sr-dot{background:var(--red);}
+  .sr.optional .sr-dot{background:rgba(74,52,40,0.15);}
+  .sr-line .sr-title{flex:1;min-width:0;display:block;font-size:13.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sr-qty{font-size:12.5px;color:rgba(74,52,40,0.55);white-space:nowrap;font-variant-numeric:tabular-nums;}
+  .sr.low .sr-qty,.sr.neg .sr-qty{color:var(--red);font-weight:600;}
+  .sr.optional .sr-title,.sr.optional .sr-qty{color:rgba(74,52,40,0.4);}
+  .sr.optional .sr-cost{opacity:.45;}
+  .sr.more-open .sr-line{padding-bottom:6px;}
+  .sr-body{padding:0 14px 14px 32px;}
+  .sr-meta{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:rgba(74,52,40,0.45);}
+  .sr-meta .red{color:var(--red);font-weight:600;}
+  .sr-body .sr-more{margin-top:12px;}
+  .sr-actions{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+  .sr-must{display:inline-flex;align-items:center;gap:8px;background:none;border:none;padding:4px 0;font-family:inherit;font-size:11.5px;color:rgba(74,52,40,0.7);cursor:pointer;}
+  .sr-must[aria-pressed="true"] .stk-track{background:var(--orange);}
+  .sr-must[aria-pressed="true"] .stk-track::after{transform:translateX(12px);}
+  .sr-link{background:none;border:none;font-family:inherit;font-size:11px;color:rgba(74,52,40,0.4);padding:4px 0;cursor:pointer;text-decoration:underline;}
+  .sg-opt{border-top:1px solid var(--border);}
+  .sg-opt > summary{list-style:none;padding:9px 14px;font-size:10.5px;letter-spacing:1px;color:rgba(74,52,40,0.4);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .sg-opt > summary::-webkit-details-marker{display:none;}
+  .sg-opt > summary::before{content:'▸  ';}
+  .sg-opt[open] > summary::before{content:'▾  ';}
+
   .recipe-table-wrap{overflow-x:auto;margin:0 -18px;padding:0 18px;}
   .recipe-table{width:100%;border-collapse:collapse;font-size:12px;min-width:880px;}
   .recipe-table th{text-align:left;padding:8px 10px;color:rgba(74,52,40,0.4);font-size:9px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;}
@@ -656,13 +684,14 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     let ingredientId = null;
 
     if (!isFixed) {
-      const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity`);
+      // ชื่อเดียวกัน = ของตัวเดียวกัน (ต่างร้าน = แค่ต่างราคา ดูในประวัติจัดซื้อ) → รวมเข้าแถวที่ใช้อยู่เสมอ ไม่สร้างใหม่
+      const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity,active&order=active.desc`);
       if (existing && existing.length) {
         ingredientId = existing[0].id;
         // สต็อกเพิ่มเข้าเสมอทุกครั้งที่บันทึกซื้อของ — ไม่ผูกกับ checkbox "อัปเดตต้นทุนอ้างอิง" อีกต่อไป
         // (บั๊กเดิม: ถ้าไม่ติ๊ก สต็อกจะไม่เพิ่มเลย ทั้งที่ของซื้อเข้ามาจริง — ต้นเหตุสต็อกติดลบทั่วร้าน)
         const newStock = Number(existing[0].stock_quantity || 0) + qty;
-        const patchBody = { stock_quantity: newStock, updated_at: new Date().toISOString() };
+        const patchBody = { stock_quantity: newStock, active: true, updated_at: new Date().toISOString() };
         if (updateCost) {
           patchBody.purchase_unit_size = qty;
           patchBody.purchase_unit_cost = cost;
@@ -721,13 +750,19 @@ let stockLoaded = false;
 let receiptsLoaded = false;
 
 const STOCK_GROUPS = [
-  { title: "เมล็ดกาแฟ", match: c => c === "coffee_bean" },
-  { title: "เบส (มัทฉะ/ชาไทย/โกโก้)", match: c => c === "base" },
-  { title: "มิกเซอร์", match: c => c === "milk" || c === "other" },
-  { title: "ปรุงแต่ง", match: c => c === "syrup" },
-  { title: "อื่นๆ", match: c => ![ "coffee_bean", "base", "milk", "other", "syrup" ].includes(c) },
+  { key: "coffee",    title: "☕ เมล็ดกาแฟ" },
+  { key: "matcha",    title: "🍵 มัทฉะ" },
+  { key: "tea_cocoa", title: "🫖 ชา & โกโก้" },
+  { key: "fruit",     title: "🍊 ผลไม้" },
+  { key: "milk_core", title: "🥛 นม & ของเหลวหลัก" },
+  { key: "additive",  title: "🍯 สารปรุงแต่ง" },
+  { key: "prep",      title: "🥣 วัตถุดิบปรุง" },
+  { key: "topping",   title: "🍓 ท็อปปิ้ง (ทำเอง)" },
+  { key: "packaging", title: "📦 แพ็กเกจจิ้ง" },
 ];
-const LS_STOCK_COLLAPSED = "ops_stock_collapsed_groups";
+// ของใหม่ที่ยังไม่มี stock_group → เดาจาก category เดิม (ไม่แตะ category เพราะหน้าชง/Owner ใช้อยู่)
+const STOCK_GROUP_FALLBACK = { coffee_bean: "coffee", base: "tea_cocoa", milk: "milk_core", syrup: "additive", topping: "topping", packaging: "packaging", other: "prep" };
+const LS_STOCK_COLLAPSED = "ops_stock_collapsed_groups_v2";
 const LS_STOCK_SHOW_COST = "ops_stock_show_cost";
 let stockState = { ings: [], recipeMax: {} };
 let stockWired = false;
@@ -736,7 +771,8 @@ function stkLsGet(k, def) { try { const v = localStorage.getItem(k); return v ==
 function stkLsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 function stkEsc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 function stkNum(v) { if (v === null || v === undefined || v === "") return ""; const n = Number(v); return Number.isFinite(n) ? String(n) : ""; }
-function stkGroupOf(i) { return STOCK_GROUPS.find(g => g.match(i.category)); }
+function stkGroupKey(i) { if (i.stock_group) return i.stock_group; if (i.is_packaging) return "packaging"; return STOCK_GROUP_FALLBACK[i.category] || "prep"; }
+function stkGroupOf(i) { const k = stkGroupKey(i); return STOCK_GROUPS.find(g => g.key === k) || STOCK_GROUPS.find(g => g.key === "prep"); }
 
 // ทำได้อีกกี่แก้ว — logic เดียวกับ computeCupsRemainingMap (coffee_bean = 20g/แก้ว, อื่นๆ = สูตรที่ใช้เยอะสุด) แต่คำนวณในเครื่อง ไม่ต้อง query ใหม่ทุกครั้งที่ปรับเลข
 function stkCups(i) {
@@ -754,34 +790,48 @@ function stkRowHtml(i) {
   const neg = stkIsNeg(i);
   const low = stkIsAlert(i);
   let cost = "";
-  if (i.base_unit === "g" && i.cost_per_base_unit) {
+  // ต้นทุน ฿/ช็อต 20g มีความหมายเฉพาะเมล็ดกาแฟ — ของอื่นไม่โชว์ ลดความรก
+  if (i.category === "coffee_bean" && i.base_unit === "g" && i.cost_per_base_unit) {
     const c20 = Number(i.cost_per_base_unit) * 20;
-    let tier = "";
-    if (i.category === "coffee_bean") tier = c20 >= 23 ? " cost-high" : (c20 <= 17 ? " cost-low" : " cost-mid");
+    const tier = c20 >= 23 ? " cost-high" : (c20 <= 17 ? " cost-low" : " cost-mid");
     cost = `<span class="sr-cost${tier}">฿${Math.round(c20)}</span>`;
   }
   const unit = stkEsc(i.base_unit || "");
-  const note = neg
-    ? `<div class="sr-note red">⚠️ สต็อกติดลบ — ตรวจนับของจริงแล้วปรับยอด</div>`
-    : (low ? `<div class="sr-note red">🔴 ทำได้อีกแค่ ${cups} แก้ว — ควรซื้อเพิ่ม</div>` : "");
-  return `<div class="sr${neg ? " neg" : (low ? " low" : "")}" data-ing-id="${stkEsc(i.id)}">
-    <div class="sr-top">
-      <div class="sr-name" data-act="more" role="button" tabindex="0" aria-label="เพิ่มสต็อก / ดูประวัติ ${stkEsc(i.name)}"><span class="sr-title">${stkEsc(i.name)}<span class="sr-caret">▼</span></span><span class="sr-sub">${stkEsc(CAT_LABEL[i.category] || i.category)}${i.supplier ? " · " + stkEsc(i.supplier) : ""}</span></div>
+  const qtyTxt = `${Number(i.stock_quantity || 0).toLocaleString()} ${unit}`;
+  const status = neg ? "ติดลบ — ตรวจนับแล้วปรับยอด"
+    : (low ? `ทำได้อีก ${cups} แก้ว — ควรซื้อเพิ่ม` : (cups !== null ? `ทำได้อีก ${cups} แก้ว` : ""));
+  const cls = !isMust ? " optional" : (neg ? " neg" : (low ? " low" : ""));
+  return `<div class="sr${cls}" data-ing-id="${stkEsc(i.id)}">
+    <div class="sr-line" data-act="more" role="button" tabindex="0" aria-expanded="false" aria-label="${stkEsc(i.name)} — แตะเพื่อแก้ยอด">
+      <span class="sr-dot"></span>
+      <span class="sr-title">${stkEsc(i.name)}</span>
       ${cost}
-      <button type="button" class="sr-chip ${isMust ? "on" : "off"}" data-act="must" title="${isMust ? "ของจำเป็นประจำร้าน — แตะเพื่อปิดการเตือนสต็อกต่ำ" : "ไม่ใช่ของจำเป็น (ไม่เตือนสต็อกต่ำ) — แตะเพื่อเปิดเตือน"}">${isMust ? "✅ จำเป็น" : "⚪ ไม่จำเป็น"}</button>
-      <button type="button" class="sr-x" data-act="hide" title="ซ่อนออกจากลิสต์" aria-label="ซ่อน ${stkEsc(i.name)}">✕</button>
+      <span class="sr-qty">${qtyTxt}</span>
     </div>
-    <div class="sr-edit">
-      <label class="sr-field"><span>คงเหลือ</span><input type="number" inputmode="decimal" step="any" data-f="stock" value="${stkNum(i.stock_quantity)}" aria-label="ยอดสต็อกคงเหลือ"><em>${unit}</em></label>
-      <label class="sr-field"><span>เตือนที่</span><input type="number" inputmode="decimal" step="any" data-f="par" value="${stkNum(i.par_level)}" placeholder="–" aria-label="ระดับเตือนล่วงหน้า (par level)"><em>${unit}</em></label>
-      <button type="button" class="sr-save" data-act="save" disabled>บันทึก</button>
+    <div class="sr-body" hidden>
+      <div class="sr-meta"><span>${stkEsc(i.supplier || "")}</span><span class="${isMust && (neg || low) ? "red" : ""}">${stkEsc(status)}</span></div>
+      <div class="sr-edit">
+        <label class="sr-field"><span>คงเหลือ</span><input type="number" inputmode="decimal" step="any" data-f="stock" value="${stkNum(i.stock_quantity)}" aria-label="ยอดสต็อกคงเหลือ"><em>${unit}</em></label>
+        <label class="sr-field"><span>เตือนที่</span><input type="number" inputmode="decimal" step="any" data-f="par" value="${stkNum(i.par_level)}" placeholder="–" aria-label="ระดับเตือนล่วงหน้า (par level)"><em>${unit}</em></label>
+        <button type="button" class="sr-save" data-act="save" disabled>บันทึก</button>
+      </div>
+      <div class="sr-more"></div>
+      <div class="sr-actions">
+        <button type="button" class="sr-must" data-act="must" aria-pressed="${isMust}"><span class="stk-track"></span><span>จำเป็นต้องมีติดร้าน</span></button>
+        <button type="button" class="sr-link" data-act="hide">ซ่อนจากลิสต์</button>
+      </div>
     </div>
-    ${note}
-    <div class="sr-more" hidden></div>
   </div>`;
 }
 
 function stkGroupItems(g) { return stockState.ings.filter(i => stkGroupOf(i) === g); }
+function stkGroupBodyHtml(items, key) {
+  const must = items.filter(i => i.must_have !== false)
+    .sort((a, b) => (stkNeedsAttention(b) - stkNeedsAttention(a)) || a.name.localeCompare(b.name, "th"));
+  const opt = items.filter(i => i.must_have === false).sort((a, b) => a.name.localeCompare(b.name, "th"));
+  return must.map(stkRowHtml).join("")
+    + (opt.length ? `<details class="sg-opt" data-opt="${stkEsc(key)}"><summary>ไม่จำเป็น · ${opt.length}</summary>${opt.map(stkRowHtml).join("")}</details>` : "");
+}
 function stkNeedsAttention(i) { return i.must_have !== false && (stkIsNeg(i) || stkIsAlert(i)); }
 function stkWarnCount(items) { return items.filter(stkNeedsAttention).length; }
 
@@ -804,7 +854,7 @@ function stkAlertHtml() {
 // อัปเดตเฉพาะตัวเลขสรุป (หัวกลุ่ม + กล่องเตือน) โดยไม่แตะแถวอื่น — กันค่าที่กำลังพิมพ์ค้างอยู่หาย และกันหน้ากระโดด
 function stkRefreshSummaries() {
   STOCK_GROUPS.forEach(g => {
-    const sec = document.querySelector(`#s-list .sg[data-group="${CSS.escape(g.title)}"]`);
+    const sec = document.querySelector(`#s-list .sg[data-group="${CSS.escape(g.key)}"]`);
     if (!sec) return;
     const items = stkGroupItems(g);
     if (!items.length) { sec.remove(); return; }
@@ -820,12 +870,12 @@ function stkRenderAll() {
   STOCK_GROUPS.forEach(g => {
     const items = stkGroupItems(g);
     if (!items.length) return;
-    const isCollapsed = collapsed.includes(g.title);
-    html += `<section class="sg${isCollapsed ? " collapsed" : ""}" data-group="${stkEsc(g.title)}">
+    const isCollapsed = collapsed.includes(g.key);
+    html += `<section class="sg${isCollapsed ? " collapsed" : ""}" data-group="${stkEsc(g.key)}">
       <button type="button" class="sg-head" data-act="toggle-group" aria-expanded="${!isCollapsed}">
         <span class="sg-chev">▾</span><span class="sg-title">${stkEsc(g.title)}</span><span class="sg-meta">${stkGroupMetaHtml(items)}</span>
       </button>
-      <div class="sg-body">${items.map(stkRowHtml).join("")}</div>
+      <div class="sg-body">${stkGroupBodyHtml(items, g.key)}</div>
     </section>`;
   });
   listEl.innerHTML = html || '<div class="empty">ยังไม่มีวัตถุดิบในระบบ</div>';
@@ -903,7 +953,7 @@ function stkWire() {
   });
 
   root.addEventListener("keydown", (e) => {
-    if (e.target.matches('.sr-name[data-act="more"]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.target.click(); return; }
+    if (e.target.matches('.sr-line[data-act="more"]') && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); e.target.click(); return; }
     if (e.key !== "Enter" || !e.target.matches("input[data-f]")) return;
     const row = e.target.closest(".sr");
     const btn = row.querySelector(e.target.dataset.f === "add" ? ".sr-add-btn" : ".sr-save");
@@ -938,9 +988,11 @@ function stkWire() {
     if (!ing) return;
 
     if (act === "more") {
+      const bodyEl = row.querySelector(".sr-body");
+      const lineEl = row.querySelector(".sr-line");
+      if (!bodyEl.hidden) { bodyEl.hidden = true; row.classList.remove("more-open"); lineEl.setAttribute("aria-expanded", "false"); return; }
+      bodyEl.hidden = false; row.classList.add("more-open"); lineEl.setAttribute("aria-expanded", "true");
       const panel = row.querySelector(".sr-more");
-      if (!panel.hidden) { panel.hidden = true; row.classList.remove("more-open"); return; }
-      panel.hidden = false; row.classList.add("more-open");
       const unit = stkEsc(ing.base_unit || "");
       panel.innerHTML = `
         <div class="sr-add">
@@ -948,13 +1000,13 @@ function stkWire() {
           <label class="sr-field"><input type="number" inputmode="decimal" step="any" min="0" data-f="add" placeholder="เช่น ทำเพิ่ม 500" aria-label="จำนวนที่เพิ่ม"><em>${unit}</em></label>
           <button type="button" class="sr-add-btn" data-act="add" disabled>เพิ่ม</button>
         </div>
-        <div class="sr-add-hint">ใช้เมื่อทำของเองเพิ่ม (เช่น วุ้น/แยม) หรือของเข้าที่ไม่ผ่านหน้าจัดซื้อ — บวกเข้ายอดเดิมทันที</div>
+        <div class="sr-add-hint">ทำของเองเพิ่ม หรือของเข้าที่ไม่ผ่านหน้าจัดซื้อ</div>
         <div class="sr-hist"><div class="sr-hist-h">ยอดเปลี่ยนล่าสุด</div><div class="sr-hist-body sr-hist-empty">กำลังโหลด...</div></div>`;
       try {
         const rows = await sb(`stock_movements?ingredient_id=eq.${encodeURIComponent(ing.id)}&order=changed_at.desc&limit=8&select=old_qty,new_qty,delta,changed_at`);
         const body = panel.querySelector(".sr-hist-body");
         if (!rows || !rows.length) {
-          body.textContent = "ยังไม่มีประวัติ — เริ่มบันทึกยอดที่เปลี่ยนตั้งแต่ 3 ต.ค. 2569 (ไม่ระบุสาเหตุ ดูจากเวลา)";
+          body.textContent = "ยังไม่มีประวัติ";
         } else {
           body.className = "sr-hist-body";
           body.innerHTML = rows.map(r => {
@@ -1009,7 +1061,7 @@ function stkWire() {
       try {
         const res = await sb(`ingredients?id=eq.${encodeURIComponent(ing.id)}`, { method: "PATCH", body: JSON.stringify({ must_have: !current, updated_at: new Date().toISOString() }) });
         Object.assign(ing, Array.isArray(res) && res[0] ? res[0] : { must_have: !current });
-        stkReplaceRow(ing, { keepInputs: true });
+        const y = window.scrollY; stkRenderAll(); window.scrollTo(0, y); // ย้ายไปท้ายหมวด/กลับขึ้นมา
       } catch (err) {
         alert("บันทึกไม่สำเร็จ: " + err.message);
         btn.disabled = false;
