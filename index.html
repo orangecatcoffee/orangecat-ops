@@ -333,6 +333,7 @@
     </select>
     <div class="field-hint" id="p-name-hint" style="display:none;"></div>
     <input id="p-name" type="text" placeholder="พิมพ์ชื่อรายการใหม่..." style="display:none;margin-top:8px;">
+    <div class="field-hint" id="p-last-hint" style="display:none;margin-top:6px;"></div>
     <div class="hist-toggle" id="p-hist-toggle">ประวัติที่เคยกรอก ▾</div>
     <div class="hist-panel" id="p-hist-panel" style="display:none;"><div class="hist-empty">กำลังโหลด...</div></div>
 
@@ -566,7 +567,63 @@ function setNewItemMode(isNew) {
 }
 document.getElementById("p-name-select").addEventListener("change", (e) => {
   setNewItemMode(e.target.value === "__new__");
+  if (e.target.value && e.target.value !== "__new__") prefillFromLastPurchase(e.target.value);
+  else pLastHint("");
 });
+
+// ---------- เติมฟอร์มจากการซื้อครั้งล่าสุดของรายการนี้ (4 ต.ค. 2569) ----------
+// เลือกของที่เคยซื้อ → ขึ้น จำนวน/หน่วย/ร้าน/ราคา ของครั้งล่าสุดให้เลย แล้วกดยืนยันหรือแก้ตัวเลขได้ทันที (โน้ตเก่าไม่คัดลอก แค่โชว์ให้ดู)
+function pLastHint(msg) {
+  const h = document.getElementById("p-last-hint");
+  h.style.display = msg ? "block" : "none";
+  h.textContent = msg || "";
+}
+async function prefillFromLastPurchase(name) {
+  pLastHint("");
+  try {
+    const rows = await sb(`purchase_log?select=quantity,unit,total_cost,supplier,notes,purchase_date&item_name=eq.${encodeURIComponent(name)}&order=purchase_date.desc,created_at.desc&limit=1`);
+    if (!rows.length) return false;
+    const r = rows[0];
+    if (r.quantity != null) document.getElementById("p-qty").value = r.quantity;
+    const unitSel = document.getElementById("p-unit");
+    if (r.unit && Array.from(unitSel.options).some(o => o.value === r.unit)) unitSel.value = r.unit;
+    if (r.total_cost != null) document.getElementById("p-cost").value = r.total_cost;
+    document.getElementById("p-supplier").value = r.supplier || "";
+    const d = r.purchase_date ? new Date(r.purchase_date + "T00:00:00").toLocaleDateString("th-TH", { day: "numeric", month: "short" }) : "";
+    pLastHint(`เติมจากการซื้อล่าสุด${d ? " (" + d + ")" : ""}: ${r.quantity ?? "–"} ${r.unit || ""} · ฿${r.total_cost ?? "–"}${r.supplier ? " · " + r.supplier : ""}${r.notes ? " · โน้ตเดิม: " + r.notes : ""} — ตรวจแล้วกดบันทึก หรือแก้ตัวเลขได้เลย`);
+    return true;
+  } catch (e) { return false; }
+}
+
+// ---------- ลิงก์เติมของ  …/#restock=ชื่อวัตถุดิบ  (จาก Alert LINE / หน้าชง) ----------
+async function handleRestockHash() {
+  const m = location.hash.match(/^#restock=(.+)$/);
+  if (!m) return;
+  let name = "";
+  try { name = decodeURIComponent(m[1]); } catch (e) { return; }
+  if (!name) return;
+  document.querySelector('.tab[data-tab="purchase"]').click();
+  try {
+    const rows = await sb(`ingredients?select=name,category&name=eq.${encodeURIComponent(name)}&active=eq.true&limit=1`);
+    const catSel = document.getElementById("p-category");
+    const nameSel = document.getElementById("p-name-select");
+    const cat = rows.length ? rows[0].category : "other";
+    catSel.value = Array.from(catSel.options).some(o => o.value === cat) ? cat : "other";
+    await applyCategoryMode();
+    if (Array.from(nameSel.options).some(o => o.value === name)) {
+      nameSel.value = name; setNewItemMode(false);
+    } else {
+      nameSel.value = "__new__"; setNewItemMode(true);
+      document.getElementById("p-name").value = name;
+    }
+    const filled = await prefillFromLastPurchase(name);
+    const qty = document.getElementById("p-qty");
+    qty.scrollIntoView({ block: "center" });
+    (filled ? document.getElementById("p-submit") : qty).focus();
+    history.replaceState(null, "", location.pathname + location.search); // กัน refresh แล้วทำซ้ำ
+  } catch (e) { /* เงียบไว้ ผู้ใช้กรอกเองได้ */ }
+}
+window.addEventListener("hashchange", handleRestockHash);
 
 // ซัพพลายเออร์ที่เคยใช้ — เติมใน <datalist> ให้ขึ้นเป็น dropdown คำแนะนำใต้ช่องพิมพ์อัตโนมัติ (แบบเดียวกับ Google)
 async function loadSupplierChips() {
@@ -591,8 +648,7 @@ function applyCategoryMode() {
   return loadNameOptionsForCategory(category);
 }
 document.getElementById("p-category").addEventListener("change", applyCategoryMode);
-applyCategoryMode();
-applyCategoryMode();
+applyCategoryMode().then(handleRestockHash);
 
 // ---------- HISTORY TOGGLE ----------
 let historyLoaded = false;
@@ -727,6 +783,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     document.getElementById("p-name-select").value = "";
     document.getElementById("p-name").value = "";
     setNewItemMode(false);
+    pLastHint("");
     document.getElementById("p-qty").value = "";
     document.getElementById("p-cost").value = "";
     document.getElementById("p-supplier").value = "";
