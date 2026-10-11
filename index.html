@@ -367,7 +367,7 @@
 
     <div class="checkrow" id="p-updatecost-row">
       <input type="checkbox" id="p-updatecost" checked>
-      <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ไม่ว่าติ๊กหรือไม่ สต็อกจะถูกเพิ่มเข้าเสมอ ปิดถ้าราคาซื้อครั้งนี้ไม่ใช่ราคาปกติ (เช่น ซื้อโปรโมชั่น/ราคาพิเศษ)</span>
+      <span>อัปเดตต้นทุนอ้างอิงของวัตถุดิบนี้ด้วย (ใช้คำนวณต้นทุนต่อแก้ว) — ระบบ <b>เฉลี่ยถ่วงน้ำหนัก</b> ระหว่างสต็อกที่เหลือกับของที่ซื้อครั้งนี้ (ซื้อจากหลายร้านก็รวมเป็นต้นทุนเดียว) · ไม่ว่าติ๊กหรือไม่ สต็อกจะถูกเพิ่มเข้าเสมอ ปิดถ้าราคาซื้อครั้งนี้ไม่ใช่ราคาปกติ (เช่น ซื้อโปรโมชั่น/ราคาพิเศษ)</span>
     </div>
     <div class="checkrow" id="p-includefin-row" style="display:none;">
       <input type="checkbox" id="p-includefin" checked>
@@ -738,10 +738,11 @@ document.getElementById("p-submit").addEventListener("click", async () => {
   btn.disabled = true; btn.textContent = "กำลังบันทึก...";
   try {
     let ingredientId = null;
+    let avgInfo = null;
 
     if (!isFixed) {
       // ชื่อเดียวกัน = ของตัวเดียวกัน (ต่างร้าน = แค่ต่างราคา ดูในประวัติจัดซื้อ) → รวมเข้าแถวที่ใช้อยู่เสมอ ไม่สร้างใหม่
-      const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity,active&order=active.desc`);
+      const existing = await sb(`ingredients?name=ilike.${encodeURIComponent(name)}&select=id,stock_quantity,active,cost_per_base_unit,base_unit&order=active.desc`);
       if (existing && existing.length) {
         ingredientId = existing[0].id;
         // สต็อกเพิ่มเข้าเสมอทุกครั้งที่บันทึกซื้อของ — ไม่ผูกกับ checkbox "อัปเดตต้นทุนอ้างอิง" อีกต่อไป
@@ -749,8 +750,17 @@ document.getElementById("p-submit").addEventListener("click", async () => {
         const newStock = Number(existing[0].stock_quantity || 0) + qty;
         const patchBody = { stock_quantity: newStock, active: true, updated_at: new Date().toISOString() };
         if (updateCost) {
+          // ต้นทุนอ้างอิง = เฉลี่ยถ่วงน้ำหนัก (สต็อกคงเหลือ x ต้นทุนเดิม + ของที่ซื้อใหม่) ÷ (สต็อกคงเหลือ + ของใหม่)
+          // สต็อกติดลบ/ศูนย์ หรือหน่วยไม่ตรงกัน = ใช้ราคาซื้อครั้งนี้ตรงๆ
+          const oldStock = Math.max(0, Number(existing[0].stock_quantity || 0));
+          const oldCostPerUnit = Number(existing[0].cost_per_base_unit || 0);
+          const newCostPerUnit = cost / qty;
+          const sameUnit = !existing[0].base_unit || existing[0].base_unit === unit;
+          let avgCostPerUnit = newCostPerUnit;
+          if (sameUnit && oldStock > 0 && oldCostPerUnit > 0) avgCostPerUnit = (oldStock * oldCostPerUnit + qty * newCostPerUnit) / (oldStock + qty);
+          avgInfo = { oldCostPerUnit, newCostPerUnit, avgCostPerUnit, oldStock, averaged: sameUnit && oldStock > 0 && oldCostPerUnit > 0 };
           patchBody.purchase_unit_size = qty;
-          patchBody.purchase_unit_cost = cost;
+          patchBody.purchase_unit_cost = Math.round(avgCostPerUnit * qty * 10000) / 10000;
           patchBody.base_unit = unit;
           patchBody.supplier = supplier;
         }
@@ -778,7 +788,11 @@ document.getElementById("p-submit").addEventListener("click", async () => {
       }])
     });
 
-    status.textContent = ingredientId ? "บันทึกแล้ว — อัปเดตต้นทุนอ้างอิงด้วย ✓" : "บันทึกแล้ว ✓";
+    status.textContent = ingredientId
+      ? (avgInfo && avgInfo.averaged
+          ? `บันทึกแล้ว ✓ ต้นทุนเฉลี่ยใหม่ ฿${avgInfo.avgCostPerUnit.toFixed(3)}/${unit} (เดิม ฿${avgInfo.oldCostPerUnit.toFixed(3)} x สต็อก ${avgInfo.oldStock.toLocaleString()} + ซื้อใหม่ ฿${avgInfo.newCostPerUnit.toFixed(3)} x ${qty.toLocaleString()})`
+          : (updateCost ? "บันทึกแล้ว — อัปเดตต้นทุนอ้างอิงด้วย ✓" : "บันทึกแล้ว ✓ เพิ่มสต็อกแล้ว (ไม่ได้แตะต้นทุนอ้างอิง)"))
+      : "บันทึกแล้ว ✓";
     status.className = "status ok";
     document.getElementById("p-name-select").value = "";
     document.getElementById("p-name").value = "";
