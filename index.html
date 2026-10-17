@@ -310,14 +310,8 @@
 
     <label>หมวดหมู่</label>
     <select id="p-category">
-      <optgroup label="วัตถุดิบ (กระทบต้นทุนต่อแก้ว)">
-        <option value="coffee_bean">Coffee Beans</option>
-        <option value="milk">Milk/Cream</option>
-        <option value="syrup">Syrup/Powder</option>
-        <option value="base">Base (Matcha/Thai Tea/Cocoa)</option>
-        <option value="packaging">Packaging</option>
-        <option value="other">Other (ingredient)</option>
-      </optgroup>
+      <optgroup label="วัตถุดิบ (กระทบต้นทุนต่อแก้ว)" id="p-category-var">
+</optgroup>
       <optgroup label="ของใหญ่/คงที่ (ไม่กระทบต้นทุนต่อแก้ว)">
         <option value="equipment">Equipment</option>
         <option value="new_menu_trial">New Menu Trial</option>
@@ -545,7 +539,7 @@ async function loadNameOptionsForCategory(category) {
       const rows = await sb(`purchase_log?select=item_name&category=eq.${category}&order=item_name`);
       items = [...new Set(rows.map(r => r.item_name))].sort();
     } else {
-      const rows = await sb(`ingredients?select=name&active=eq.true&category=eq.${category}&order=name`);
+      const rows = await sb(`ingredients?select=name&active=eq.true&stock_group=eq.${category}&order=name`);
       items = rows.map(r => r.name);
     }
     let html = `<option value="">— เลือกรายการ —</option>`;
@@ -604,11 +598,11 @@ async function handleRestockHash() {
   if (!name) return;
   document.querySelector('.tab[data-tab="purchase"]').click();
   try {
-    const rows = await sb(`ingredients?select=name,category&name=eq.${encodeURIComponent(name)}&active=eq.true&limit=1`);
+    const rows = await sb(`ingredients?select=name,stock_group&name=eq.${encodeURIComponent(name)}&active=eq.true&limit=1`);
     const catSel = document.getElementById("p-category");
     const nameSel = document.getElementById("p-name-select");
-    const cat = rows.length ? rows[0].category : "other";
-    catSel.value = Array.from(catSel.options).some(o => o.value === cat) ? cat : "other";
+    const cat = rows.length ? (rows[0].stock_group || "prep") : "prep";
+    catSel.value = Array.from(catSel.options).some(o => o.value === cat) ? cat : "prep";
     await applyCategoryMode();
     if (Array.from(nameSel.options).some(o => o.value === name)) {
       nameSel.value = name; setNewItemMode(false);
@@ -638,6 +632,45 @@ async function loadSupplierChips() {
 }
 loadSupplierChips();
 
+// ===== หมวดวัตถุดิบ — Single Source of Truth = ตาราง ingredient_groups (แก้ที่ตารางเดียว ทุกหน้าตาม) =====
+// ค่าในโค้ดนี้เป็นแค่ "ค่าสำรอง" กรณีโหลดตารางไม่ได้ — ของจริงอ่านจากฐานข้อมูล
+const STOCK_GROUPS = [
+  { key: "coffee",       title: "☕ เมล็ดกาแฟ" },
+  { key: "matcha",       title: "🍵 มัทฉะ" },
+  { key: "tea",          title: "🫖 ชา & สมุนไพร" },
+  { key: "cocoa_powder", title: "🍫 โกโก้ & ผงเครื่องดื่ม" },
+  { key: "fruit",        title: "🍊 ผลไม้ & น้ำผลไม้" },
+  { key: "milk_core",    title: "🥛 นม & ของเหลว" },
+  { key: "additive",     title: "🍯 ความหวาน & ไซรัป" },
+  { key: "prep",         title: "🥣 วัตถุดิบแปรรูป" },
+  { key: "topping",      title: "🍓 ท็อปปิ้ง (ทำเอง)", purchasable: false },
+  { key: "packaging",    title: "📦 แพ็กเกจจิ้ง" },
+];
+// ของใหม่ที่ยังไม่มี stock_group → เดาจาก category เดิม (ฐานข้อมูลมี trigger เติม stock_group ให้อยู่แล้ว นี่เป็นแค่สำรอง)
+const STOCK_GROUP_FALLBACK = { coffee_bean: "coffee", base: "tea", milk: "milk_core", syrup: "additive", topping: "topping", packaging: "packaging", other: "prep" };
+let GROUP_PURCHASE_CAT = { coffee: "coffee_bean", matcha: "base", tea: "base", cocoa_powder: "base", fruit: "base", milk_core: "milk", additive: "syrup", prep: "other", packaging: "packaging" };
+let histGroupByName = {};
+
+function renderPurchaseGroupOptions() {
+  const og = document.getElementById("p-category-var");
+  const catSel = document.getElementById("p-category");
+  if (!og || !catSel) return;
+  const cur = catSel.value;
+  og.innerHTML = STOCK_GROUPS.filter(g => g.purchasable !== false).map(g => `<option value="${g.key}">${g.title}</option>`).join("");
+  if (cur && Array.from(catSel.options).some(o => o.value === cur)) catSel.value = cur;
+}
+async function loadIngredientGroups() {
+  try {
+    const rows = await sb("ingredient_groups?select=*&active=eq.true&order=sort_order");
+    if (rows && rows.length) {
+      STOCK_GROUPS.length = 0;
+      rows.forEach(g => STOCK_GROUPS.push({ key: g.key, title: `${g.icon} ${g.label_th}`.trim(), purchasable: g.purchasable }));
+      GROUP_PURCHASE_CAT = Object.fromEntries(rows.map(g => [g.key, g.purchase_category]));
+    }
+  } catch (e) { /* ใช้ค่าสำรองในโค้ด */ }
+  renderPurchaseGroupOptions();
+}
+
 // เปลี่ยนหมวดหมู่ → โหลดรายการที่กรองแล้วใหม่ + ปรับ field ที่เกี่ยวข้องตามประเภทหมวด
 function applyCategoryMode() {
   const category = document.getElementById("p-category").value;
@@ -648,7 +681,8 @@ function applyCategoryMode() {
   return loadNameOptionsForCategory(category);
 }
 document.getElementById("p-category").addEventListener("change", applyCategoryMode);
-applyCategoryMode().then(handleRestockHash);
+renderPurchaseGroupOptions();
+loadIngredientGroups().then(() => applyCategoryMode()).then(handleRestockHash);
 
 // ---------- HISTORY TOGGLE ----------
 let historyLoaded = false;
@@ -656,6 +690,7 @@ async function loadHistory() {
   const panel = document.getElementById("p-hist-panel");
   try {
     const rows = await sb("purchase_log?select=item_name,category,quantity,unit,supplier,created_at&order=created_at.desc&limit=200");
+try { const ingRows = await sb("ingredients?select=name,stock_group&active=eq.true"); histGroupByName = Object.fromEntries(ingRows.map(i => [i.name.toLowerCase(), i.stock_group])); } catch (e) {}
     const seen = new Set();
     const distinct = [];
     for (const r of rows) {
@@ -675,7 +710,8 @@ async function loadHistory() {
     `).join("");
     panel.querySelectorAll(".hist-chip").forEach(chip => {
       chip.addEventListener("click", async () => {
-        document.getElementById("p-category").value = chip.dataset.category;
+        const hc = chip.dataset.category;
+document.getElementById("p-category").value = FIXED_CATEGORIES.includes(hc) ? hc : (histGroupByName[chip.dataset.name.toLowerCase()] || STOCK_GROUP_FALLBACK[hc] || "prep");
         await applyCategoryMode();
         const sel = document.getElementById("p-name-select");
         const matchOpt = Array.from(sel.options).find(o => o.value === chip.dataset.name);
@@ -721,6 +757,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
   const category = document.getElementById("p-category").value;
   const isFixed = FIXED_CATEGORIES.includes(category);
   const noUnit = HIDE_QTY_UNIT_CATEGORIES.includes(category);
+const purchaseCat = isFixed ? category : (GROUP_PURCHASE_CAT[category] || "other"); // หมวดสำหรับรายงานกำไรขาดทุน (Owner)
   const qty = noUnit ? 1 : parseFloat(document.getElementById("p-qty").value);
   const unit = noUnit ? "ครั้ง" : document.getElementById("p-unit").value;
   const cost = parseFloat(document.getElementById("p-cost").value);
@@ -770,7 +807,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
         const created = await sb("ingredients", {
           method: "POST",
           body: JSON.stringify([{
-            name, category, base_unit: unit,
+            name, stock_group: category, base_unit: unit,
             purchase_unit_size: qty, purchase_unit_cost: cost, supplier, notes, stock_quantity: qty
           }])
         });
@@ -781,7 +818,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
     await sb("purchase_log", {
       method: "POST",
       body: JSON.stringify([{
-        item_name: name, category, quantity: qty, unit, total_cost: cost,
+        item_name: name, category: purchaseCat, quantity: qty, unit, total_cost: cost,
         supplier, purchase_date: date, notes, ingredient_id: ingredientId,
         cost_type: isFixed ? "fixed" : "variable",
         include_in_financials: isFixed ? includeInFinancials : true
@@ -820,19 +857,7 @@ document.getElementById("p-submit").addEventListener("click", async () => {
 let stockLoaded = false;
 let receiptsLoaded = false;
 
-const STOCK_GROUPS = [
-  { key: "coffee",    title: "☕ เมล็ดกาแฟ" },
-  { key: "matcha",    title: "🍵 มัทฉะ" },
-  { key: "tea_cocoa", title: "🫖 ชา & โกโก้" },
-  { key: "fruit",     title: "🍊 ผลไม้" },
-  { key: "milk_core", title: "🥛 นม & ของเหลวหลัก" },
-  { key: "additive",  title: "🍯 สารปรุงแต่ง" },
-  { key: "prep",      title: "🥣 วัตถุดิบปรุง" },
-  { key: "topping",   title: "🍓 ท็อปปิ้ง (ทำเอง)" },
-  { key: "packaging", title: "📦 แพ็กเกจจิ้ง" },
-];
-// ของใหม่ที่ยังไม่มี stock_group → เดาจาก category เดิม (ไม่แตะ category เพราะหน้าชง/Owner ใช้อยู่)
-const STOCK_GROUP_FALLBACK = { coffee_bean: "coffee", base: "tea_cocoa", milk: "milk_core", syrup: "additive", topping: "topping", packaging: "packaging", other: "prep" };
+// STOCK_GROUPS / STOCK_GROUP_FALLBACK ย้ายไปประกาศด้านบน (ใกล้ฟอร์มจัดซื้อ) และโหลดจากตาราง ingredient_groups
 const LS_STOCK_COLLAPSED = "ops_stock_collapsed_groups_v2";
 const LS_STOCK_SHOW_COST = "ops_stock_show_cost";
 let stockState = { ings: [], recipeMax: {} };
